@@ -1,4 +1,5 @@
-import 'react'
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 var rootElement =
         React.createElement('div', {},
@@ -15,4 +16,5 @@ var rootElement =
                 )
         )
 
-ReactDOM.render(rootElement, document.getElementById('react-app'))
+ReactDOM.render(rootElement, document.getElementById('react-app'));
+
