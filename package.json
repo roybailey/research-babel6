@@ -15,11 +15,9 @@
   "keywords": [
     "React",
     "Webpack",
-    "Babel",
-    "Starter",
-    "template"
+    "Babel"
   ],
-  "author": "Ali Al Dallal",
+  "author": "Roy Bailey",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/roybailey/research-babel6/issues"
