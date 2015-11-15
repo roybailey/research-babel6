@@ -14,10 +14,10 @@ var config = {
         'babel-polyfill',
 
         // For hot style updates
-        'webpack/hot/dev-server',
+        // 'webpack/hot/dev-server',
 
         // The script refreshing the browser on none hot updates
-        'webpack-dev-server/client?http://localhost:8080',
+        // 'webpack-dev-server/client?http://localhost:8080',
 
         // Our application
         mainPath],
@@ -61,7 +61,7 @@ var config = {
 
     // We have to manually add the Hot Replacement plugin when running
     // from Node
-    plugins: [new Webpack.HotModuleReplacementPlugin()]
+    //plugins: [new Webpack.HotModuleReplacementPlugin()]
 };
 
 module.exports = config;
