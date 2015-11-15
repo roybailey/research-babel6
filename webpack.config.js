@@ -11,7 +11,8 @@ module.exports = {
     devtool: process.env.WEBPACK_DEVTOOL || 'source-map',
     output: {
         path: path.join(__dirname, 'public', 'dist'),
-        filename: 'bundle.js'
+        filename: 'bundle.js',
+        publicPath: '/public/dist/'
     },
     resolve: {
         extensions: ['', '.js', '.jsx']
@@ -69,6 +70,10 @@ module.exports = {
         inline: true
     },
     plugins: [
-      new webpack.NoErrorsPlugin()
+        new webpack.ProvidePlugin({
+            $: "jquery",
+            jQuery: "jquery"
+        }),
+        new webpack.NoErrorsPlugin()
     ]
 };
