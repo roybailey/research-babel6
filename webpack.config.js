@@ -9,7 +9,7 @@ module.exports = {
   ],
     devtool: process.env.WEBPACK_DEVTOOL || 'source-map',
     output: {
-        path: path.join(__dirname, 'public', 'build'),
+        path: path.join(__dirname, 'public', 'dist'),
         filename: 'bundle.js'
     },
     resolve: {
