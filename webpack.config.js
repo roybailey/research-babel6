@@ -1,67 +1,70 @@
-var Webpack = require('webpack');
+var webpack = require('webpack');
 var path = require('path');
-var nodeModulesPath = path.resolve(__dirname, 'node_modules');
-var buildPath = path.resolve(__dirname, 'public', 'build');
-var mainPath = path.resolve(__dirname, 'src', 'main.js');
 
-var config = {
-
-    // Makes sure errors in console map to the correct file
-    // and line number
-    devtool: 'source-map',
+module.exports = {
     entry: [
-        // Set up an ES6-ish environment
-        'babel-polyfill',
-
-        // For hot style updates
-        // 'webpack/hot/dev-server',
-
-        // The script refreshing the browser on none hot updates
-        // 'webpack-dev-server/client?http://localhost:8080',
-
-        // Our application
-        mainPath],
+    //'webpack-dev-server/client?http://0.0.0.0:8080', // WebpackDevServer host and port
+    //'webpack/hot/only-dev-server',
+    './src/index.jsx' // Your appʼs entry point
+  ],
+    devtool: process.env.WEBPACK_DEVTOOL || 'source-map',
     output: {
-
-        // We need to give Webpack a path. It does not actually need it,
-        // because files are kept in memory in webpack-dev-server, but an
-        // error will occur if nothing is specified. We use the buildPath
-        // as that points to where the files will eventually be bundled
-        // in production
-        path: buildPath,
-        filename: 'bundle.js',
-
-        // Everything related to Webpack should go through a build path,
-        // localhost:3000/build. That makes proxying easier to handle
-        publicPath: '/build/'
+        path: path.join(__dirname, 'public', 'build'),
+        filename: 'bundle.js'
+    },
+    resolve: {
+        extensions: ['', '.js', '.jsx']
     },
     module: {
-
         loaders: [
+            {
+                test: /\.jsx?$/,
+                exclude: /(node_modules|bower_components)/,
+                loaders: ['react-hot', 'babel'],
+            },
 
             {
-                loader: "babel-loader",
-
-                // Skip any files outside of your project's `src` directory
-                include: [
-                    path.resolve(__dirname, "src"),
-                ],
-
-                // Only run `.js` and `.jsx` files through Babel
-                test: /\.jsx?$/,
-
-                // Options to configure babel with
-                query: {
-                    plugins: ['transform-runtime'],
-                    presets: ['es2015', 'react']
-                }
+                test: /\.css$/,
+                loader: 'style-loader!css-loader'
+            },
+            {
+                test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+                loader: "file"
+            },
+            {
+                test: /\.(woff|woff2)$/,
+                loader: "url?prefix=font/&limit=5000"
+            },
+            {
+                test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+                loader: "url?limit=10000&mimetype=application/octet-stream"
+            },
+            {
+                test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+                loader: "url?limit=10000&mimetype=image/svg+xml"
+            },
+            {
+                test: /\.gif/,
+                loader: "url-loader?limit=10000&mimetype=image/gif"
+            },
+            {
+                test: /\.jpg/,
+                loader: "url-loader?limit=10000&mimetype=image/jpg"
+            },
+            {
+                test: /\.png/,
+                loader: "url-loader?limit=10000&mimetype=image/png"
             }
-        ]
+
+             ]
     },
-
-    // We have to manually add the Hot Replacement plugin when running
-    // from Node
-    //plugins: [new Webpack.HotModuleReplacementPlugin()]
+    devServer: {
+        contentBase: "./public",
+        noInfo: true, //  --no-info option
+        hot: true,
+        inline: true
+    },
+    plugins: [
+      new webpack.NoErrorsPlugin()
+    ]
 };
-
-module.exports = config;
