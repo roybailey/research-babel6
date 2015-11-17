@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --progress --profile --colors",
     "dev": "webpack-dev-server --progress --profile --colors --hot",
-    "http": "http-server public"
+    "start": "http-server public"
   },
   "repository": {
     "type": "git",
