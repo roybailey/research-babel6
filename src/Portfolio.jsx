@@ -1,17 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import D3 from 'd3';
 
 class Portfolio extends React.Component {
+
     render() {
+        var categoriesList = [];
+        this.props.categories.forEach((category)=> {
+            categoriesList.push(<li key={category}><a href="#">{category}</a></li>);
+        });
+        console.log(categoriesList);
         return (
             <div className="uk-grid" data-uk-grid-margin>
                 <div className="uk-width-1-1">
 
                     <ul className="uk-subnav uk-subnav-pill" data-uk-switcher="{connect:'#switcher-content'}">
                         <li className="uk-active"><a href="#">All</a></li>
-                        <li><a href="#">Logo</a></li>
-                        <li><a href="#">Web</a></li>
-                        <li><a href="#">App</a></li>
+                        {categoriesList}
                     </ul>
 
                     <ul id="switcher-content" className="uk-switcher">
@@ -715,7 +720,8 @@ class Portfolio extends React.Component {
 
                 </div>
             </div>
-        );
+        )
+            ;
     }
 }
 

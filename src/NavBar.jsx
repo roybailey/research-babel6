@@ -8,8 +8,8 @@ class NavBar extends React.Component {
 				<a className="uk-navbar-brand uk-hidden-small" href="dashboard.html">Knowledge Centre</a>
 				<ul className="uk-navbar-nav uk-hidden-small">
 					<li><a href="features.html">Features</a></li>
-					<li><a href="">Data Flows</a></li>
-					<li><a href="">Technologies</a></li>
+					<li><a href="dataflows.html">Data Flows</a></li>
+					<li><a href="technologies.html">Technologies</a></li>
 					<li className="uk-parent" data-uk-dropdown>
 						<a href="">Teams</a>
 

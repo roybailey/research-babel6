@@ -1,0 +1,69 @@
+Category,Name,Strategy,Score
+Platform,C++,Reduce,26.5
+Platform,Flex,Reduce,26.5
+Platform,iOS,Keep,26.5
+Platform,Java,Keep,26.5
+Platform,Web,Increase,26.5
+Technical Component,29West,Reduce,26.5
+Technical Component,App Dynamics,Increase,26.5
+Technical Component,Attivio,Keep,26.5
+Technical Component,Cassandra,Keep,26.5
+Technical Component,Chromium,Reduce,26.5
+Technical Component,CQ5,Reduce,26.5
+Technical Component,D3,Keep,26.5
+Technical Component,EMS,Keep,26.5
+Technical Component,FMS,Keep,26.5
+Technical Component,Gemfire,Reduce,26.5
+Technical Component,Grunt,Keep,26.5
+Technical Component,Jetty,Keep,26.5
+Technical Component,jQuery,Keep,26.5
+Technical Component,LCDS,Reduce,26.5
+Technical Component,LCES,Reduce,26.5
+Technical Component,Maven,Keep,26.5
+Technical Component,Neo4J,Keep,26.5
+Technical Component,Netty,Keep,26.5
+Technical Component,NodeJS,Keep,26.5
+Technical Component,Oracle,Keep,26.5
+Technical Component,Parsley,Keep,26.5
+Technical Component,Redis,Keep,26.5
+Technical Component,SmartLogic,Keep,26.5
+Technical Component,Splunk,Increase,26.5
+Technical Component,Spring,Keep,26.5
+Technical Component,Tomcat,Keep,26.5
+Technical Component,Vertx,Increase,26.5
+Technical Component,WebTrends,Reduce,26.5
+Business Component,Alerts,n/a,26.5
+Business Component,Analytics Toolbox,n/a,26.5
+Business Component,Charts,n/a,26.5
+Business Component,Content Streams,n/a,26.5
+Business Component,Entitlements,n/a,26.5
+Business Component,Entity Views,n/a,26.5
+Business Component,Follow,n/a,26.5
+Business Component,FX PB,n/a,26.5
+Business Component,Health Check,n/a,26.5
+Business Component,Instrument Data,n/a,26.5
+Business Component,Interstitial,n/a,26.5
+Business Component,Launcher,n/a,26.5
+Business Component,Login,n/a,26.5
+Business Component,My Views,n/a,26.5
+Business Component,Neo Oz,n/a,26.5
+Business Component,NeoLive,n/a,26.5
+Business Component,NeoTalk,n/a,26.5
+Business Component,Onboarding Tool,n/a,26.5
+Business Component,Org Chart,n/a,26.5
+Business Component,Persistence,n/a,26.5
+Business Component,Profiles,n/a,26.5
+Business Component,Publishing Tool,n/a,26.5
+Business Component,Reader,n/a,26.5
+Business Component,Search,n/a,26.5
+Business Component,Sharing,n/a,26.5
+Business Component,Shell,n/a,26.5
+Business Component,Statistics,n/a,26.5
+Business Component,Super Grid,n/a,26.5
+Business Component,Terms & Conditions,n/a,26.5
+Business Component,Tickets,n/a,26.5
+Business Component,Tokens,n/a,26.5
+Business Component,Usage Tracking,n/a,26.5
+Business Component,User Config,n/a,26.5
+Business Component,User Settings,n/a,26.5
+Business Component,X-Ray Reports,n/a,26.5
