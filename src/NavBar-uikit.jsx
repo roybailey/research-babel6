@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-class NavBar extends React.Component {
+class MainNavBar extends React.Component {
 	render() {
 		return (
 			<nav className="uk-navbar uk-margin-large-bottom">
@@ -76,4 +76,4 @@ class NavBar extends React.Component {
 	}
 }
 
-export default NavBar;
+export default MainNavBar;

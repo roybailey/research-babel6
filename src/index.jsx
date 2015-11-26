@@ -2,15 +2,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import request from 'superagent';
 
-import NavBar from './NavBar.jsx';
+import MainNavBar from './NavBar-semantic.jsx';
 import SplashScreen from './SplashScreen.jsx';
 import SectionOverview from './SectionOverview.jsx';
 import ArticleOverview from './ArticleOverview.jsx';
 import ThumbnailBar from './ThumbnailBar.jsx';
-import Portfolio from './Portfolio.jsx';
+import Portfolio from './Portfolio-uikit-sample.jsx';
 
 if (document.querySelector("#NavBar")) {
-    ReactDOM.render(<NavBar/>, document.querySelector("#NavBar"));
+    ReactDOM.render(<MainNavBar/>, document.querySelector("#NavBar"));
 }
 
 if (document.querySelector("#SplashScreen")) {
