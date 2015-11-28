@@ -1,0 +1,11 @@
+Org,Repo,Type,Complexity
+Data,persistence-service,Java,3
+Data,data-gateway,Java,4
+Data,data-storage,Java,5
+Analytics,analytics-toolbox,Flex,5
+Analytics,custom-data,Flex,5
+Analytics,price-chart,Flex,5
+Search,global-search,HTML,1
+Search,instrument-search,Flex,1
+Search,search-restful-service,Java,1
+Search,search-engine-node,Java,1

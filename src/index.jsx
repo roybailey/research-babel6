@@ -2,27 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import request from 'superagent';
 
-import NavBar from './NavBar.jsx';
-import SplashScreen from './SplashScreen.jsx';
-import SectionOverview from './SectionOverview.jsx';
-import ArticleOverview from './ArticleOverview.jsx';
-import ThumbnailBar from './ThumbnailBar.jsx';
-import Portfolio from './Portfolio.jsx';
+import MainNavBar from './NavBar-semantic.jsx';
+import Portfolio from './Portfolio-semantic.jsx';
+import StatusTable from './StatusTable-semantic.jsx';
+
+var href = window.location.href;
+var page = href.substr(href.lastIndexOf('/') + 1);
 
 if (document.querySelector("#NavBar")) {
-    ReactDOM.render(<NavBar/>, document.querySelector("#NavBar"));
-}
-
-if (document.querySelector("#SplashScreen")) {
-    ReactDOM.render(<SplashScreen/>, document.querySelector("#SplashScreen"));
-}
-
-if (document.querySelector("#SectionOverview")) {
-    ReactDOM.render(<SectionOverview/>, document.querySelector("#SectionOverview"));
-}
-
-if (document.querySelector("#ArticleOverview")) {
-    ReactDOM.render(<ArticleOverview/>, document.querySelector("#ArticleOverview"));
+    console.log(href);
+    console.log(page);
+    ReactDOM.render(<MainNavBar page={page}/>, document.querySelector("#NavBar"));
 }
 
 if (document.querySelector("#Features")) {
@@ -78,18 +68,38 @@ if (document.querySelector("#Technologies")) {
 
     d3.csv("../data/technical-estate.csv", (dataset)=> {
         console.log(JSON.stringify(dataset));
-        var categorySet = d3.nest().key((it)=> {
-            return it['Name'];
-        }).entries(dataset);
-        console.log(JSON.stringify(categorySet));
         var props = {
-            categories: categorySet.map((it)=> it.key)
+            dataset: []
         };
-        ReactDOM.render(<Portfolio {...props}/>, document.querySelector("#Technologies"));
+        dataset.filter((it)=> it.Category === "Technical Component").forEach((item=> {
+            props.dataset.push({
+                group: item.Category,
+                title: item.Name,
+                status: item.Strategy,
+                score: item.Score
+            })
+        }));
+        ReactDOM.render(<StatusTable {...props}/>, document.querySelector("#Technologies"));
     });
 
 }
 
-if (document.querySelector("#ThumbnailBar")) {
-    ReactDOM.render(<ThumbnailBar/>, document.querySelector("#ThumbnailBar"));
+if (document.querySelector("#Codebase")) {
+
+    d3.csv("../data/codebase.csv", (dataset)=> {
+        console.log(JSON.stringify(dataset));
+        var props = {
+            dataset: []
+        };
+        dataset.forEach((item=> {
+            props.dataset.push({
+                group: item.Org,
+                title: item.Repo,
+                status: item.Type,
+                score: item.Complexity
+            })
+        }));
+        ReactDOM.render(<StatusTable {...props}/>, document.querySelector("#Codebase"));
+    });
 }
+

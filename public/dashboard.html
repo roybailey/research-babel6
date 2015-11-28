@@ -1,72 +1,86 @@
 <!DOCTYPE html>
 <html lang="en" class="no-js">
 <head>
-    <title>Frontpage</title>
-    <!--
+    <title>Dashboard</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.23.0/js/uikit.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.23.0/css/uikit.min.css"/>
-    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.css"/>
+    <!--
     <script src="_assets/jquery/2.1.4/jquery.min.js"></script>
-    <script src="_assets/uikit/uikit-2.23.0/js/uikit.min.js"></script>
-    <link rel="stylesheet" href="_assets/uikit/uikit-2.23.0/css/uikit.min.css"/>
-    <style>
-        .splash-screen {
-            background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxNi4wLjQsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+DQo8c3ZnIHZlcnNpb249IjEuMSIgaWQ9IkViZW5lXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHg9IjBweCIgeT0iMHB4Ig0KCSB3aWR0aD0iMTEzMHB4IiBoZWlnaHQ9IjQ1MHB4IiB2aWV3Qm94PSIwIDAgMTEzMCA0NTAiIGVuYWJsZS1iYWNrZ3JvdW5kPSJuZXcgMCAwIDExMzAgNDUwIiB4bWw6c3BhY2U9InByZXNlcnZlIj4NCjxyZWN0IGZpbGw9IiNGNUY1RjUiIHdpZHRoPSIxMTMwIiBoZWlnaHQ9IjQ1MCIvPg0KPC9zdmc+DQo=') 50% 0 no-repeat;
-            height: 450px;
-        }
-    </style>
+    <script src="_assets/semantic-ui/2.1.6/semantic.min.js"></script>
+    <link rel="stylesheet" href="_assets/semantic-ui/2.1.6/semantic.min.css"/>
+    -->
+    <link rel="stylesheet" href="dashboard.css"/>
 </head>
-<body>
+<body id="home">
 
-<div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
-
+<div class="pusher">
     <div id="NavBar"></div>
-    <div id="SplashScreen"></div>
-    <hr class="uk-grid-divider">
 
-    <div id="SectionOverview"></div>
-    <hr class="uk-grid-divider">
+    <div class="ui vertical masthead center aligned segment">
 
-    <div id="ArticleOverview"></div>
-    <hr class="uk-grid-divider">
+        <div class="ui text container center">
+            <h1 class="ui header">
+                Imagine-a-Company
+            </h1>
+            <h2>Do whatever you want when you want to.</h2>
+            <div class="ui huge primary button">Get Started <i class="right arrow icon"></i></div>
+        </div>
 
-    <div class="uk-grid" data-uk-grid-margin>
-        <div class="uk-width-medium-1-1">
-            <div class="uk-panel uk-panel-box uk-text-center">
-                <p><strong>Phasellus viverra nulla ut metus.</strong> Quisque rutrum etiam ultricies nisi vel augue. <a class="uk-button uk-button-primary uk-margin-left" href="#">Button</a></p>
+        <h4 class="ui horizontal divider header">
+            <i class="tag icon"></i>
+            Quick Links
+        </h4>
+
+        <div class="ui vertical feature segment">
+            <div class="ui centered page grid">
+                <div class="fourteen wide column">
+                    <div class="ui three column center aligned stackable divided grid">
+                        <div class="column">
+                            <div class="ui icon header">
+                                <i class="student icon"></i>
+                                Courses
+                            </div>
+                            <p>Take your kitty to a cat-ducation course and learn how to treat her well.</p>
+
+                            <p>
+                                <a class="ui button" href="#">
+                                    Learn
+                                </a>
+                            </p>
+                        </div>
+                        <div class="column">
+                            <div class="ui icon header">
+                                <i class="code icon"></i>
+                                Library
+                            </div>
+                            <p>Dig through our cat library to found out amazing things you can do with your kitty.</p>
+
+                            <p>
+                                <a class="ui blue right labeled icon button" href="#">
+                                    Research
+                                    <i class="right chevron icon"></i>
+                                </a>
+                            </p>
+                        </div>
+                        <div class="column">
+                            <div class="ui icon header">
+                                <i class="user icon"></i>
+                                Community
+                            </div>
+                            <p>Get feedback on your cat from a community of loving pet owners on our online bulletin board system.</p>
+
+                            <p>
+                                <a class="ui button" href="#">
+                                    Share
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <h1 class="uk-text-center">Our Clients</h1>
-
-    <div id="ThumbnailBar"></div>
-
-</div>
-
-<div id="offcanvas" class="uk-offcanvas">
-    <div class="uk-offcanvas-bar">
-        <ul class="uk-nav uk-nav-offcanvas">
-            <li class="uk-active">
-                <a href="dashboard.html">Frontpage</a>
-            </li>
-            <li>
-                <a href="layouts_portfolio.html">Portfolio</a>
-            </li>
-            <li>
-                <a href="layouts_blog.html">Blog</a>
-            </li>
-            <li>
-                <a href="layouts_documentation.html">Documentation</a>
-            </li>
-            <li>
-                <a href="layouts_contact.html">Contact</a>
-            </li>
-            <li>
-                <a href="layouts_login.html">Login</a>
-            </li>
-        </ul>
     </div>
 </div>
 
