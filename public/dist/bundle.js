@@ -5369,7 +5369,7 @@
 	
 	if (document.querySelector("#Features")) {
 	
-	    d3.csv("../data/technical-estate.csv", function (dataset) {
+	    d3.csv("./data/technical-estate.csv", function (dataset) {
 	        console.log((0, _stringify2.default)(dataset));
 	        var categorySet = d3.nest().key(function (it) {
 	            return it['Category'];
@@ -5419,7 +5419,7 @@
 	
 	if (document.querySelector("#Technologies")) {
 	
-	    d3.csv("../data/technical-estate.csv", function (dataset) {
+	    d3.csv("./data/technical-estate.csv", function (dataset) {
 	        console.log((0, _stringify2.default)(dataset));
 	        var props = {
 	            dataset: []
@@ -5440,7 +5440,7 @@
 	
 	if (document.querySelector("#Codebase")) {
 	
-	    d3.csv("../data/codebase.csv", function (dataset) {
+	    d3.csv("./data/codebase.csv", function (dataset) {
 	        console.log((0, _stringify2.default)(dataset));
 	        var props = {
 	            dataset: []

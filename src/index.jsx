@@ -17,7 +17,7 @@ if (document.querySelector("#NavBar")) {
 
 if (document.querySelector("#Features")) {
 
-    d3.csv("../data/technical-estate.csv", (dataset)=> {
+    d3.csv("./data/technical-estate.csv", (dataset)=> {
         console.log(JSON.stringify(dataset));
         var categorySet = d3.nest().key((it)=> {
             return it['Category'];
@@ -66,7 +66,7 @@ if (document.querySelector("#DataFlows")) {
 
 if (document.querySelector("#Technologies")) {
 
-    d3.csv("../data/technical-estate.csv", (dataset)=> {
+    d3.csv("./data/technical-estate.csv", (dataset)=> {
         console.log(JSON.stringify(dataset));
         var props = {
             dataset: []
@@ -86,7 +86,7 @@ if (document.querySelector("#Technologies")) {
 
 if (document.querySelector("#Codebase")) {
 
-    d3.csv("../data/codebase.csv", (dataset)=> {
+    d3.csv("./data/codebase.csv", (dataset)=> {
         console.log(JSON.stringify(dataset));
         var props = {
             dataset: []
