@@ -103,3 +103,10 @@ if (document.querySelector("#Codebase")) {
     });
 }
 
+
+import TwoLists from './Sample.jsx';
+if (document.querySelector("#TwoListsForm")) {
+    ReactDOM.render(
+        <TwoLists id="two-lists" source="../src/Sample.json"/>, document.getElementById("TwoListsForm")
+    );
+}

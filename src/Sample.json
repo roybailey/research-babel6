@@ -1,0 +1,6 @@
+{
+    "Opel": ["Agila", "Astra", "Corsa", "Vectra"],
+    "Škoda": ["Fabia", "Octavia", "Superb", "Yeti"],
+    "Toyota": ["Auris", "Avensis", "Corolla", "Prius"],
+    "Mercedes": ["A-Class", "B-Class", "C-Class", "E-Class"]
+}
