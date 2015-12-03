@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import request from 'superagent';
 
 import MainNavBar from './NavBar-semantic.jsx';
@@ -103,18 +104,6 @@ if (document.querySelector("#Codebase")) {
     });
 }
 
-
-// ------------------------------------------------------
-// Sample React Code
-// ------------------------------------------------------
-
-import TwoLists from './Sample.jsx';
-
-if (document.querySelector("#TwoListsForm")) {
-    ReactDOM.render(
-        <TwoLists id="two-lists" source="../src/Sample.json"/>, document.getElementById("TwoListsForm")
-    );
-}
 
 // ------------------------------------------------------
 // Sample Redux Code
@@ -221,6 +210,11 @@ var asyncCarDataLoadActionCreator = (source) => {
 
 console.log("\n", new Date(), 'Running our async action creator:', "\n");
 
+reduxStore.subscribe(function () {
+    console.log('reduxStore updated:', reduxStore.getState());
+    // Update your views here
+});
+
 reduxStore.dispatch(asyncCarDataLoadActionCreator('../src/Sample.json'));
 
 // Output:
@@ -238,4 +232,19 @@ setTimeout(() => {
     console.log(new Date(), '### Current Store State :' + JSON.stringify(reduxStore.getState(), undefined, 2));
     reduxStore.dispatch(addUserActionCreator('colin'));
 }, 10000);
+
+// ------------------------------------------------------
+// Sample React-Redux Code
+// ------------------------------------------------------
+
+import TwoLists from './Sample.jsx';
+
+if (document.querySelector("#TwoListsForm")) {
+    ReactDOM.render(
+        <Provider store={reduxStore}>
+            <TwoLists id="two-lists" source="../src/Sample.json"/>
+        </Provider>,
+        document.getElementById("TwoListsForm")
+    );
+}
 

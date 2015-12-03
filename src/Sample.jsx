@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { connect } from 'react-redux';
 import D3 from 'd3';
 
 class List extends React.Component {
@@ -25,24 +26,22 @@ class List extends React.Component {
 }
 
 class TwoLists extends React.Component {
+
     constructor(props) {
         super(props);
-        this.state = {
-            brand: null,
-            model: null
-        };
         this.brandChanged = this.brandChanged.bind(this);
         this.modelChanged = this.modelChanged.bind(this);
         this.buttonClicked = this.buttonClicked.bind(this);
         this.knownModel = this.knownModel.bind(this);
-        this.dataset = {};
+        // set initial state
+        this.state = {
+            brand: null, model: null
+        };
     }
 
     componentDidMount() {
-        d3.json(this.props.source, (result) => {
-            console.log(JSON.stringify(result,undefined,2));
-            this.dataset = result;
-            this.setState(this.state);
+        this.setState({
+            brand: null, model: null
         });
     }
 
@@ -72,12 +71,14 @@ class TwoLists extends React.Component {
 
     buttonClicked(event) {
         let { brand, model } = this.state;
+        console.log(this.props);
         console.log(this.state);
         console.log(`${brand} ${model} riding...`);
+        this.props.dispatch(ride(brand, model));
     }
 
     data() {
-        return this.dataset;
+        return this.props.brands || {};
     }
 
     buttonDisabled() {
@@ -85,7 +86,7 @@ class TwoLists extends React.Component {
     }
 
     models() {
-        return this.state.brand ? this.data()  [this.state.brand] : [];
+        return this.state.brand ? this.data()[this.state.brand] : [];
     }
 
     brands() {
@@ -102,6 +103,7 @@ class TwoLists extends React.Component {
 
     render() {
         console.log(this.data());
+        console.log(this.props.brands);
         return (
             <div id={this.props.id}>
                 <List name="Brand" items={this.brands()} handler={this.brandChanged} value={this.state.brand}/>
@@ -112,4 +114,29 @@ class TwoLists extends React.Component {
     }
 }
 
-export default TwoLists;
+// Which part of the Redux global state does our component want to receive as props?
+function mapStateToProps(state) {
+    return {
+        brands: state.cars.brands
+    }
+}
+
+// our action creator for clicking the ride button
+function ride(brand, model) {
+    return {
+        type: 'RIDE',
+        brand: brand,
+        model: model
+    };
+}
+
+// Which action creators does it want to receive by props?
+function mapDispatchToProps(dispatch) {
+    return {
+        onRide: () => dispatch(ride(this.state.brand, this.state.model))
+    }
+}
+
+export default connect(
+    mapStateToProps//, mapDispatchToProps
+)(TwoLists);
