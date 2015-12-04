@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import D3 from 'd3';
 
 class List extends React.Component {
@@ -8,11 +9,11 @@ class List extends React.Component {
         let { name, items } = this.props;
         let options = [];
 
-        options.push(<option value={name}>{name}</option>);
+        options.push(<option key={name} value={name}>{name}</option>);
 
         for (var index in items) {
             let item = items[index];
-            options.push(<option value={item}>{item}</option>);
+            options.push(<option key={item} value={item}>{item}</option>);
         }
 
         return (
@@ -71,10 +72,14 @@ class TwoLists extends React.Component {
 
     buttonClicked(event) {
         let { brand, model } = this.state;
+        const { onRide } = this.props;
+        console.log('########## 1) Button Click ##########');
         console.log(this.props);
         console.log(this.state);
         console.log(`${brand} ${model} riding...`);
-        this.props.dispatch(ride(brand, model));
+        console.log('########## 2) Button Click ##########');
+        onRide(brand, model);
+        console.log('########## 3) Button Click ##########');
     }
 
     data() {
@@ -102,8 +107,11 @@ class TwoLists extends React.Component {
     }
 
     render() {
+        console.log('########## 1) render ##########');
         console.log(this.data());
         console.log(this.props.brands);
+        console.log(this.props.onRide);
+        console.log('########## 2) render ##########');
         return (
             <div id={this.props.id}>
                 <List name="Brand" items={this.brands()} handler={this.brandChanged} value={this.state.brand}/>
@@ -133,10 +141,10 @@ function ride(brand, model) {
 // Which action creators does it want to receive by props?
 function mapDispatchToProps(dispatch) {
     return {
-        onRide: () => dispatch(ride(this.state.brand, this.state.model))
+        onRide: bindActionCreators(ride,dispatch)
     }
 }
 
 export default connect(
-    mapStateToProps//, mapDispatchToProps
+    mapStateToProps, mapDispatchToProps
 )(TwoLists);

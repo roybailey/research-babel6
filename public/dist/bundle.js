@@ -38655,6 +38655,8 @@
 	
 	var _reactRedux = __webpack_require__(368);
 	
+	var _redux = __webpack_require__(375);
+	
 	var _d = __webpack_require__(429);
 	
 	var _d2 = _interopRequireDefault(_d);
@@ -38680,7 +38682,7 @@
 	
 	            options.push(_react2.default.createElement(
 	                'option',
-	                { value: name },
+	                { key: name, value: name },
 	                name
 	            ));
 	
@@ -38688,7 +38690,7 @@
 	                var item = items[index];
 	                options.push(_react2.default.createElement(
 	                    'option',
-	                    { value: item },
+	                    { key: item, value: item },
 	                    item
 	                ));
 	            }
@@ -38765,11 +38767,15 @@
 	            var _state = this.state;
 	            var brand = _state.brand;
 	            var model = _state.model;
+	            var onRide = this.props.onRide;
 	
+	            console.log('########## 1) Button Click ##########');
 	            console.log(this.props);
 	            console.log(this.state);
 	            console.log(brand + ' ' + model + ' riding...');
-	            this.props.dispatch(ride(brand, model));
+	            console.log('########## 2) Button Click ##########');
+	            onRide(brand, model);
+	            console.log('########## 3) Button Click ##########');
 	        }
 	    }, {
 	        key: 'data',
@@ -38804,8 +38810,11 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
+	            console.log('########## 1) render ##########');
 	            console.log(this.data());
 	            console.log(this.props.brands);
+	            console.log(this.props.onRide);
+	            console.log('########## 2) render ##########');
 	            return _react2.default.createElement(
 	                'div',
 	                { id: this.props.id },
@@ -38841,17 +38850,12 @@
 	
 	// Which action creators does it want to receive by props?
 	function mapDispatchToProps(dispatch) {
-	    var _this3 = this;
-	
 	    return {
-	        onRide: function onRide() {
-	            return dispatch(ride(_this3.state.brand, _this3.state.model));
-	        }
+	        onRide: (0, _redux.bindActionCreators)(ride, dispatch)
 	    };
 	}
 	
-	exports.default = (0, _reactRedux.connect)(mapStateToProps //, mapDispatchToProps
-	)(TwoLists);
+	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(TwoLists);
 
 /***/ },
 /* 433 */
