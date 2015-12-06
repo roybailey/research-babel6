@@ -6,7 +6,8 @@
   "scripts": {
     "build": "webpack --progress --profile --colors",
     "dev": "webpack-dev-server --progress --profile --colors --hot",
-    "start": "http-server public"
+    "start": "http-server public",
+    "server": "babel-node --debug --presets es2015 -- feathers/feathers.js --debug"
   },
   "repository": {
     "type": "git",
@@ -24,12 +25,16 @@
   },
   "homepage": "https://github.com/roybailey/research-babel6#readme",
   "dependencies": {
+    "body-parser": "1.14.1",
     "bootstrap": "^3.3.5",
+    "feathers": "1.2.0",
+    "rainbird-neo4j": "0.4.3",
     "react": "^0.14.2",
     "react-dom": "^0.14.2",
     "react-redux": "4.0.0",
     "redux": "3.0.4",
-    "redux-thunk": "1.0.0"
+    "redux-thunk": "1.0.0",
+    "restify": "4.0.3"
   },
   "devDependencies": {
     "babel-core": "^6.1.21",
