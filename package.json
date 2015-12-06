@@ -50,6 +50,7 @@
     "d3": "3.5.9",
     "expose-loader": "0.7.1",
     "file-loader": "^0.8.4",
+    "frisby": "0.8.5",
     "style-loader": "^0.13.0",
     "superagent": "1.4.0",
     "url-loader": "^0.5.6",
