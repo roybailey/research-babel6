@@ -3,11 +3,13 @@
 
 import feathers from 'feathers';
 import bodyParser from 'body-parser';
+import todoService from './todos';
+import SkillsAPI from './skills-api';
 
 var app = feathers();
-var todoService = require('./todos');
+var skillsService = new SkillsAPI();
 
-todoService.init();
+// todoService.init();
 
 app.configure(feathers.rest())
     .use(bodyParser.json())
@@ -17,6 +19,6 @@ app.configure(feathers.rest())
         next();
     })
     .use('/todos', todoService)
+    .use('/skills', skillsService)
     .listen(3000);
-
 

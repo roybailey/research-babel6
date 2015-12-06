@@ -7,7 +7,8 @@
     "build": "webpack --progress --profile --colors",
     "dev": "webpack-dev-server --progress --profile --colors --hot",
     "start": "http-server public",
-    "server": "babel-node --debug --presets es2015 -- feathers/feathers.js --debug"
+    "feathers": "babel-node --debug --presets es2015 -- api/feathers.js --debug",
+    "restify": "babel-node --debug --presets es2015 -- api/restify.js --debug"
   },
   "repository": {
     "type": "git",

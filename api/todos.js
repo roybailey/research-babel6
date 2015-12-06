@@ -18,20 +18,20 @@ module.exports = {
     },
 
     init: function () {
-        db.query('MATCH (person:Resource) RETURN person LIMIT 100', (err, results) => {
-            if (err) {
-                console.log(err);
-            } else {
-                console.log("----- loading -----");
-                console.log(JSON.stringify(results, null, 2));
-                console.log("----- parsing -----");
-                results[0].forEach((row)=> {
-                    console.log(row.person.name);
-                    this.store.add({ todo: row.person.name });
-                });
-                console.log("----- complete -----");
-            }
-        });
+        //db.query('MATCH (person:Resource) RETURN person LIMIT 100', (err, results) => {
+        //    if (err) {
+        //        console.log(err);
+        //    } else {
+        //        console.log("----- loading -----");
+        //        console.log(JSON.stringify(results, null, 2));
+        //        console.log("----- parsing -----");
+        //        results[0].forEach((row)=> {
+        //            console.log(row.person.name);
+        //            this.store.add({ todo: row.person.name });
+        //        });
+        //        console.log("----- complete -----");
+        //    }
+        //});
     },
 
 // Tries to get a single Todo by its id.
