@@ -8,7 +8,8 @@
     "dev": "webpack-dev-server --progress --profile --colors --hot",
     "start": "http-server public",
     "feathers": "babel-node --debug --presets es2015 -- api/feathers.js --debug",
-    "restify": "babel-node --debug --presets es2015 -- api/restify.js --debug"
+    "restify": "babel-node --debug --presets es2015 -- api/restify.js --debug",
+    "test": "jasmine-node test"
   },
   "repository": {
     "type": "git",

@@ -4,12 +4,17 @@
 import feathers from 'feathers';
 import bodyParser from 'body-parser';
 import todoService from './todos';
+
+import Neo4j from 'rainbird-neo4j';
+
 import SkillsAPI from './skills-api';
+import PeopleAPI from './people-api';
+
+var db = new Neo4j('http://localhost:7474', 'neo4j', 'localhost');
+var skillsService = new SkillsAPI(db);
+var peopleService = new PeopleAPI(db);
 
 var app = feathers();
-var skillsService = new SkillsAPI();
-
-// todoService.init();
 
 app.configure(feathers.rest())
     .use(bodyParser.json())
@@ -21,5 +26,6 @@ app.configure(feathers.rest())
     })
     .use('/todos', todoService)
     .use('/skills', skillsService)
+    .use('/people', peopleService)
     .listen(3000);
 

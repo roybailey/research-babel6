@@ -4,55 +4,46 @@ import Neo4j from 'rainbird-neo4j';
 class SkillsAPI {
 
 
-    constructor() {
-        this.db = new Neo4j('http://localhost:7474', 'neo4j', 'localhost');
-
-        this.cache = {
-            // The current id counter
-            id: 0,
-            // An array with all records
-            records: [],
-
-            add(data) {
-                data.id = this.id++;
-                this.records.push(data);
-            },
-
-            get(id) {
-                var records = this.records;
-                console.log("GET:"+id);
-                for (var index = 0; index < records.length; index++) {
-                    if (records[index].id === parseInt(id, 10)) {
-                        return records[index];
-                    }
-                }
-                // If we didn't return yet we can throw an error
-                throw new Error('Could not find record '+id);
-            }
-        };
-
-
-        this.db.query('MATCH (person:Resource) RETURN person', (err, results) => {
+    constructor(db) {
+        this.db = db;
+        // test out connectivity...
+        this.find(null, (err, data)=> {
             if (err) {
-                console.log(err);
-            } else {
-                console.log("----- loading -----");
-                console.log(JSON.stringify(results, null, 2));
-                console.log("----- parsing -----");
-                results[0].forEach((row)=> {
-                    console.log(row.person.name);
-                    this.cache.add(row.person);
-                });
-                console.log("----- complete -----");
+                console.log(JSON.stringify(err, null, 2));
+            }
+            else {
+                console.log(JSON.stringify(data, null, 2));
             }
         });
     }
 
 
-
-    // Return all Todos
+    // Return all records
     find(params, callback) {
-        callback(null, this.cache.records);
+
+        let QUERY = `
+        MATCH (skill:Skill)
+        RETURN id(skill) as id, skill.name as skill, skill.type as type
+        `;
+
+        this.db.query(QUERY, (err, results) => {
+            if (err) {
+                console.log(err);
+                callback(err, null);
+            } else {
+                console.log(JSON.stringify(results, null, 2));
+                var response = [];
+                results[0].forEach((row)=> {
+                    response.push({
+                        id: row.id,
+                        skill: row.skill,
+                        type: row.type
+                    });
+                });
+                callback(null, response);
+            }
+        });
+
     }
 
 
