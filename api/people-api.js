@@ -105,23 +105,7 @@ class PeopleAPI {
     // Updates (replaces) an existing record with new data
     update(id, data, params, callback) {
 
-        this.log("updatePerson", data, params);
-        let QUERY = `
-        MERGE (person:Resource { name: '${data.name}'})
-        WHERE id(person) == ${data.id}
-        SET person.updated = timestamp()
-        RETURN id(person) as id, person.name as name
-        `;
-
-        this.db.query(QUERY, (err, results) => {
-            if (err) {
-                console.log(err);
-                callback(err, null);
-            } else {
-                console.log(JSON.stringify(results, null, 2));
-                callback(null, this.decoder(results)[0]);
-            }
-        });
+        throw new MethodNotAllowedError();
     }
 
 
@@ -131,7 +115,7 @@ class PeopleAPI {
         this.log("patchPerson", data, params);
         let QUERY = `
         MERGE (person:Resource { name: '${data.name}'})
-        WHERE id(person) == ${data.id}
+        WHERE id(person) = ${data.id}
         SET person.updated = timestamp()
         RETURN id(person) as id, person.name as name
         `;
