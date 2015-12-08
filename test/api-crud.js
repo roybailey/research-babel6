@@ -4,91 +4,97 @@ module.exports = function (baseurl) {
 
     var testSuit = {};
 
-    testSuit.findPerson = (json, pipeline) => {
-        console.log("---------- find ----------");
-        frisby.create('Get All People')
-            .get(baseurl)
-            .inspectHeaders()
-            .inspectJSON()
-            .expectStatus(200)
-            .expectHeaderContains('content-type', 'application/json')
-            .expectJSONTypes('*', {
-                id: Number,
-                name: String
-            })
-            .expectJSON('?', {
-                name: "Ash"
-            })
-            .toss();
-    };
 
-
-    testSuit.createPerson = (json, pipeline) => {
-        console.log("---------- create ----------");
+    testSuit.create = (jsonData, typeCheck, pipeline) => {
+        var url = baseurl;
+        console.log(">>> CREATE: " + url);
         // create new person record
-        frisby.create('Create a new Person')
-            .post(baseurl, json, {json: true})
+        frisby.create('Create a new Resource')
+            .post(url, jsonData, {json: true})
             .inspectHeaders()
             .inspectJSON()
             .expectStatus(201)
             .expectHeaderContains('content-type', 'application/json')
-            .expectJSONTypes({
-                id: Number,
-                name: String
-            })
-            .expectJSON({
-                name: "Frisby"
-            })
-            .afterJSON(function (json) {
-                console.log(json);
-                pipeline[0](json, pipeline.slice(1));
+            .expectJSONTypes(typeCheck)
+            .expectJSON(jsonData)
+            .afterJSON(function (jsonResponse) {
+                if (pipeline) {
+                    pipeline(jsonResponse);
+                }
             })
             .toss();
     };
 
 
-    testSuit.getPerson = (json, pipeline) => {
-        console.log("---------- get ----------");
+    testSuit.get = (jsonData, typeChecks, pipeline) => {
+        var url = baseurl + jsonData.id;
+        console.log(">>> GET: " + url);
         // get newly created person...
-        frisby.create('Get Newly Created Person ' + json.name)
-            .get(baseurl + json.id)
+        frisby.create('Get Newly Created Resource ' + json.id)
+            .get(url)
             .inspectHeaders()
             .inspectJSON()
             .expectStatus(200)
             .expectHeaderContains('content-type', 'application/json')
-            .expectJSONTypes({
-                id: Number,
-                name: String
-            })
-            .expectJSON({
-                name: "Frisby"
-            })
-            .afterJSON(function (json) {
-                console.log(json);
-                pipeline[0](json, pipeline.slice(1));
+            .expectJSONTypes(typeChecks)
+            .expectJSON(jsonData)
+            .afterJSON(function (jsonResponse) {
+                if (pipeline) {
+                    pipeline(jsonResponse);
+                }
             })
             .toss();
     };
 
-    testSuit.deletePerson = function(json, pipeline) {
-        console.log("---------- delete ----------");
-        // delete newly created person
-        frisby.create('Delete Newly Created Person ' + json.name)
-            .delete(baseurl + json.id)
+
+    testSuit.find = (jsonData, typeChecks, pipeline) => {
+        var url = baseurl;
+        console.log(">>> FIND: " + url);
+        frisby.create('Get All Resources')
+            .get(url)
             .inspectHeaders()
             .inspectJSON()
             .expectStatus(200)
-            .afterJSON(function (json) {
-                console.log("deleted person");
-                if (pipeline[0]) {
-                    pipeline[0](json, pipeline.slice(1));
+            .expectHeaderContains('content-type', 'application/json')
+            .expectJSONTypes('*', typeChecks)
+            .expectJSON('?', jsonData)
+            .afterJSON(function (jsonResponse) {
+                if (pipeline) {
+                    pipeline(jsonResponse);
+                }
+            })
+            .toss();
+    };
+
+
+    testSuit.delete = (jsonData, typeChecks, pipeline) => {
+        var url = baseurl + jsonData.id;
+        console.log(">>> DELETE: " + url);
+        // delete newly created resource
+        frisby.create('Delete Newly Created Person ' + json.name)
+            .delete(url)
+            .inspectHeaders()
+            .inspectJSON()
+            .expectStatus(200)
+            .afterJSON(function (jsonResponse) {
+                if (pipeline) {
+                    pipeline(jsonResponse);
                 }
             })
             .toss()
     };
 
-    testSuit.test = function(json) {
-        this.createPerson(json, [this.getPerson, this.deletePerson, this.findPerson]);
+    testSuit.test = function (name, typeCheck, jsonData) {
+
+        this.create(jsonData, typeCheck, (jsonCreated) => {
+            this.get(jsonCreated, typeCheck, (jsonFound) => {
+                this.find(jsonFound, typeCheck, () => {
+                    this.delete(jsonFound, null, () => {
+                        console.log(name + " Done.");
+                    });
+                });
+            });
+        });
     };
 
     return testSuit;
