@@ -31,7 +31,8 @@ class PeopleAPI {
         results[0].forEach((row)=> {
             response.push({
                 id: row.id,
-                name: row.name
+                name: row.name,
+                location: row.location
             });
         });
         return response;
@@ -43,7 +44,7 @@ class PeopleAPI {
         this.log("findPerson", null, params);
         let QUERY = `
         MATCH (person:Resource)
-        RETURN id(person) as id, person.name as name
+        RETURN id(person) as id, person.name as name, person.location as location
         `;
 
         this.db.query(QUERY, (err, results) => {
@@ -65,7 +66,7 @@ class PeopleAPI {
         let QUERY = `
         MATCH (person:Resource)
         WHERE id(person) = ${id}
-        RETURN id(person) as id, person.name as name
+        RETURN id(person) as id, person.name as name, person.location as location
         `;
 
         this.db.query(QUERY, (err, results) => {
@@ -85,9 +86,9 @@ class PeopleAPI {
 
         this.log("createPerson", data, params);
         let QUERY = `
-        MERGE (person:Resource { name: '${data.name}'})
+        MERGE (person:Resource { name: '${data.name}', location: '${data.location}'})
         ON CREATE SET person.created = timestamp()
-        RETURN id(person) as id, person.name as name
+        RETURN id(person) as id, person.name as name, person.location as location
         `;
 
         this.db.query(QUERY, (err, results) => {
@@ -105,7 +106,25 @@ class PeopleAPI {
     // Updates (replaces) an existing record with new data
     update(id, data, params, callback) {
 
-        throw new MethodNotAllowedError();
+        this.log("updatePerson", data, params);
+        let QUERY = `
+        MATCH (person:Resource)
+        WHERE id(person) = ${data.id}
+        SET person.name = '${data.name}',
+            person.location = '${data.location}',
+            person.updated = timestamp()
+        RETURN id(person) as id, person.name as name, person.location as location
+        `;
+
+        this.db.query(QUERY, (err, results) => {
+            if (err) {
+                console.log(err);
+                callback(err, null);
+            } else {
+                console.log(JSON.stringify(results, null, 2));
+                callback(null, this.decoder(results)[0]);
+            }
+        });
     }
 
 
@@ -114,10 +133,12 @@ class PeopleAPI {
 
         this.log("patchPerson", data, params);
         let QUERY = `
-        MERGE (person:Resource { name: '${data.name}'})
+        MATCH (person:Resource)
         WHERE id(person) = ${data.id}
-        SET person.updated = timestamp()
-        RETURN id(person) as id, person.name as name
+        SET person.name = '${data.name}',
+            person.location = '${data.location}',
+            person.updated = timestamp()
+        RETURN id(person) as id, person.name as name, person.location as location
         `;
 
         this.db.query(QUERY, (err, results) => {

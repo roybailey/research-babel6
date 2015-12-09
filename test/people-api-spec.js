@@ -3,20 +3,38 @@ var BASEURL = 'http://localhost:3000/people/';
 
 var crudTesting = require('./api-crud.js')(BASEURL);
 
-//crudTesting.createPerson(
-//    { name: 'Frisby' },
-//    [crudTesting.getPerson, crudTesting.deletePerson, crudTesting.findPerson]
-//);
-
-crudTesting.test(
-    "Person",
-    {
-        id: Number,
-        name: String
+crudTesting.test({
+    scenario: "Person",
+    create: {
+        data: {
+            name: 'Frisby'
+        },
+        type: {
+            id: Number,
+            name: String,
+            location: function(val) { expect(val).toBeTypeOrNull(String); }
+        }
     },
-    {
-        name: 'Frisby'
+    patch: {
+        data: {
+            name: 'Frisby',
+            location: 'UK'
+        },
+        type: {
+            id: Number,
+            name: String,
+            location: String
+        }
+    },
+    update: {
+        data: {
+            name: 'Frisby2'
+        },
+        type: {
+            id: Number,
+            name: String
+        }
     }
-);
+});
 
 

@@ -47,6 +47,48 @@ module.exports = function (baseurl) {
     };
 
 
+    testSuit.patch = (jsonData, typeCheck, pipeline) => {
+        var url = baseurl + jsonData.id;
+        console.log(">>> PATCH: " + url);
+        // create new person record
+        frisby.create('Create a new Resource')
+            .patch(url, jsonData, {json: true})
+            .inspectHeaders()
+            .inspectJSON()
+            .expectStatus(200)
+            .expectHeaderContains('content-type', 'application/json')
+            .expectJSONTypes(typeCheck)
+            .expectJSON(jsonData)
+            .afterJSON(function (jsonResponse) {
+                if (pipeline) {
+                    pipeline(jsonResponse);
+                }
+            })
+            .toss();
+    };
+
+
+    testSuit.update = (jsonData, typeCheck, pipeline) => {
+        var url = baseurl + jsonData.id;
+        console.log(">>> UPDATE: " + url);
+        // create new person record
+        frisby.create('Update a Resource')
+            .put(url, jsonData, {json: true})
+            .inspectHeaders()
+            .inspectJSON()
+            .expectStatus(200)
+            .expectHeaderContains('content-type', 'application/json')
+            .expectJSONTypes(typeCheck)
+            .expectJSON(jsonData)
+            .afterJSON(function (jsonResponse) {
+                if (pipeline) {
+                    pipeline(jsonResponse);
+                }
+            })
+            .toss();
+    };
+
+
     testSuit.find = (jsonData, typeChecks, pipeline) => {
         var url = baseurl;
         console.log(">>> FIND: " + url);
@@ -84,13 +126,19 @@ module.exports = function (baseurl) {
             .toss()
     };
 
-    testSuit.test = function (name, typeCheck, jsonData) {
-
-        this.create(jsonData, typeCheck, (jsonCreated) => {
-            this.get(jsonCreated, typeCheck, (jsonFound) => {
-                this.find(jsonFound, typeCheck, () => {
-                    this.delete(jsonFound, null, () => {
-                        console.log(name + " Done.");
+    testSuit.test = function (input) {
+        console.log(input.scenario + " Started " + baseurl);
+        this.create(input.create.data, input.create.type, (jsonCreated) => {
+            this.get(jsonCreated, input.create.type, (jsonFound) => {
+                input.patch.data.id = jsonFound.id;
+                this.patch(input.patch.data, input.patch.type, () => {
+                    input.update.data.id = jsonFound.id;
+                    this.update(input.update.data, input.update.type, () => {
+                        this.find(input.update.data, input.create.type, () => {
+                            this.delete({id: jsonFound.id}, null, () => {
+                                console.log(input.scenario + " Done.");
+                            });
+                        });
                     });
                 });
             });
