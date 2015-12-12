@@ -12,7 +12,8 @@ class SkillsAPI {
                 console.log(JSON.stringify(err, null, 2));
             }
             else {
-                console.log(JSON.stringify(data, null, 2));
+                console.log("SkillsAPI");
+                console.log(JSON.stringify(data));
             }
         });
     }
@@ -31,7 +32,7 @@ class SkillsAPI {
                 console.log(err);
                 callback(err, null);
             } else {
-                console.log(JSON.stringify(results, null, 2));
+                // console.log(JSON.stringify(results));
                 var response = [];
                 results[0].forEach((row)=> {
                     response.push({

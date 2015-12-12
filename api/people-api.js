@@ -3,6 +3,13 @@ import Neo4j from 'rainbird-neo4j';
 
 class PeopleAPI {
 
+    static RETURN() { return `
+    RETURN  id(person) as id,
+            person.name as name,
+            person.location as location,
+            person.created as created,
+            person.updated as updated`
+    };
 
     constructor(db) {
         this.db = db;
@@ -12,7 +19,8 @@ class PeopleAPI {
                 console.log(JSON.stringify(err, null, 2));
             }
             else {
-                console.log(JSON.stringify(data, null, 2));
+                console.log("PeopleAPI");
+                console.log(JSON.stringify(data));
             }
         });
     }
@@ -32,7 +40,9 @@ class PeopleAPI {
             response.push({
                 id: row.id,
                 name: row.name,
-                location: row.location
+                location: row.location,
+                created: row.created,
+                updated: row.updated
             });
         });
         return response;
@@ -44,15 +54,20 @@ class PeopleAPI {
         this.log("findPerson", null, params);
         let QUERY = `
         MATCH (person:Resource)
-        RETURN id(person) as id, person.name as name, person.location as location
-        `;
+        ` +PeopleAPI.RETURN();
 
         this.db.query(QUERY, (err, results) => {
             if (err) {
                 console.log(err);
                 callback(err, null);
             } else {
-                console.log(JSON.stringify(results, null, 2));
+                console.log(results.length);
+                if(results.length > 1) {
+                    console.log(JSON.stringify(results[0])+"..."+JSON.stringify(results[results.length-1]));
+                }
+                else if(results.length === 1) {
+                    console.log(JSON.stringify(results[0]));
+                }
                 callback(null, this.decoder(results));
             }
         });
@@ -66,8 +81,7 @@ class PeopleAPI {
         let QUERY = `
         MATCH (person:Resource)
         WHERE id(person) = ${id}
-        RETURN id(person) as id, person.name as name, person.location as location
-        `;
+        ` +PeopleAPI.RETURN();
 
         this.db.query(QUERY, (err, results) => {
             if (err) {
@@ -85,13 +99,15 @@ class PeopleAPI {
     create(data, params, callback) {
 
         this.log("createPerson", data, params);
+        let PARAMS = {params: data};
         let QUERY = `
-        MERGE (person:Resource { name: '${data.name}', location: '${data.location}'})
+        MERGE (person:Resource {name:'${params.name}'})
+        ON CREATE SET person += {params}
         ON CREATE SET person.created = timestamp()
-        RETURN id(person) as id, person.name as name, person.location as location
-        `;
+        ON MATCH SET person.updated = timestamp()
+        ` +PeopleAPI.RETURN();
 
-        this.db.query(QUERY, (err, results) => {
+        this.db.query(QUERY, PARAMS, (err, results) => {
             if (err) {
                 console.log(err);
                 callback(err, null);
@@ -109,14 +125,12 @@ class PeopleAPI {
         this.log("updatePerson", data, params);
         let QUERY = `
         MATCH (person:Resource)
-        WHERE id(person) = ${data.id}
-        SET person.name = '${data.name}',
-            person.location = '${data.location}',
+        WHERE id(person) = {id}
+        SET person.name = {name},
+            person.location = {location},
             person.updated = timestamp()
-        RETURN id(person) as id, person.name as name, person.location as location
-        `;
-
-        this.db.query(QUERY, (err, results) => {
+        ` +PeopleAPI.RETURN();
+        this.db.query(QUERY, data, (err, results) => {
             if (err) {
                 console.log(err);
                 callback(err, null);
@@ -138,8 +152,7 @@ class PeopleAPI {
         SET person.name = '${data.name}',
             person.location = '${data.location}',
             person.updated = timestamp()
-        RETURN id(person) as id, person.name as name, person.location as location
-        `;
+        ` +PeopleAPI.RETURN();
 
         this.db.query(QUERY, (err, results) => {
             if (err) {
