@@ -9,7 +9,7 @@
     "start": "http-server public",
     "feathers": "babel-node --debug --presets es2015 -- api/feathers.js --debug",
     "restify": "babel-node --debug --presets es2015 -- api/restify.js --debug",
-    "test": "jasmine-node test"
+    "test": "mocha test/*test.js"
   },
   "repository": {
     "type": "git",

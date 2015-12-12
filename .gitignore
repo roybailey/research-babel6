@@ -16,3 +16,4 @@ target/
 node_modules/
 public/_assets
 
+/nbproject/private/
