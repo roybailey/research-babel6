@@ -45,6 +45,7 @@ class PeopleAPI {
                 updated: row.updated
             });
         });
+        console.log(JSON.stringify(response));
         return response;
     }
 
@@ -112,7 +113,7 @@ class PeopleAPI {
                 console.log(err);
                 callback(err, null);
             } else {
-                console.log(JSON.stringify(results, null, 2));
+                console.log(JSON.stringify(results));
                 callback(null, this.decoder(results)[0]);
             }
         });

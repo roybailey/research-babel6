@@ -20,26 +20,42 @@ module.exports = function (spec) {
 
     describe(spec.name, function () {
 
-        it(`POST ${spec.api} should create new resource from input data`, function (done) {
+        it.only(`POST ${spec.api} should create new resource from input data`, function (done) {
 
-            api.post(logRequest(spec.api))
-                .set('Accept', 'application/json')
-                .send(spec.jsonInput)
-                .expect(201)
-                .end(function (err, res) {
-                    if (err) return done(err);
-                    logResponse(res);
+            spec.post.forEach(function (entry) {
+                api.post(logRequest(spec.api))
+                    .set('Accept', 'application/json')
+                    .send(entry.send)
+                    .expect(201)
+                    .end(function (err, res) {
+                        if (err) return done(err);
+                        logResponse(res);
 
-                    (res.body).should.contain.keys(['id', 'name']);
-                    (res.body.id).should.be.a(spec.jsonSchema.id);
-                    (res.body.name).should.be.a(spec.jsonSchema.name);
-                    (res.body.name).should.equal(spec.jsonInput.name);
-                    (res.body).should.contain(spec.jsonInput);
+                        // validate the response data types...
+                        for (var property in entry.typeMatch) {
+                            if (entry.typeMatch.hasOwnProperty(property)) {
+                                console.log(`Checking ${res.body[property]} is type ${entry.typeMatch[property].toLowerCase()}`);
+                                (res.body).should.contain.key(property);
+                                (res.body[property]).should.be.a(entry.typeMatch[property]);
+                            }
+                        }
 
-                    spec.jsonInput.id = res.body.id;
-                    done();
-                });
+                        // validate the response data values...
+                        if(typeof entry.dataMatch === 'function') {
+                            console.log("Checking response against custom function");
+                            (entry.dataMatch(res.body)).should.equal(true);
+                        } else if(typeof entry.dataMatch === 'object') {
+                            console.log("Checking response against custom object");
+                            (res.body).should.contain(entry.dataMatch);
+                        } else {
+                            console.log("Checking response against input");
+                            (res.body).should.contain(entry.send);
+                        }
 
+                        send.id = res.body.id;
+                    });
+            });
+            done();
         });
 
 
