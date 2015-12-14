@@ -6,93 +6,94 @@ var supertest = require('supertest');
 
 module.exports = function (spec) {
 
-    var api = supertest(spec.baseurl);
+    var request = supertest(spec.baseurl);
 
-    logRequest = function (req) {
-        console.log("> " + req);
+    logRequest = function (req, data) {
+        console.log("> " + req + " > " + JSON.stringify(data));
         return req;
     };
-    logResponse = function (res) {
-        console.log("< " + res.status);
-        console.log(res.body);
+    logResponse = function (err, res) {
+        if (err) {
+            console.log("< " + err);
+        } else {
+            console.log("< " + res.status);
+            console.log(res.body);
+        }
+        return err;
     };
-
+    assertSchema = function (typeMatch, record) {
+        // validate the response data types...
+        for (var property in typeMatch) {
+            if (typeMatch.hasOwnProperty(property)) {
+                console.log(`Checking ${record[property]} is type ${typeMatch[property].toLowerCase()}`);
+                (record).should.contain.key(property);
+                (record[property]).should.be.a(typeMatch[property]);
+            }
+        }
+    };
 
     describe(spec.name, function () {
 
-        it.only(`POST ${spec.api} should create new resource from input data`, function (done) {
+        it(`POST ${spec.baseapi} should create new resource from input data`, function (done) {
 
-            spec.post.forEach(function (entry) {
-                api.post(logRequest(spec.api))
+            var dataset = spec.post();
+            var count = 0;
+            dataset.forEach(function (entry) {
+                request.post(logRequest(spec.baseapi, entry.send))
                     .set('Accept', 'application/json')
                     .send(entry.send)
                     .expect(201)
                     .end(function (err, res) {
-                        if (err) return done(err);
-                        logResponse(res);
+                        if (logResponse(err, res))
+                            return done(err);
 
                         // validate the response data types...
-                        for (var property in entry.typeMatch) {
-                            if (entry.typeMatch.hasOwnProperty(property)) {
-                                console.log(`Checking ${res.body[property]} is type ${entry.typeMatch[property].toLowerCase()}`);
-                                (res.body).should.contain.key(property);
-                                (res.body[property]).should.be.a(entry.typeMatch[property]);
-                            }
-                        }
+                        var typeMatch = entry.typeMatch || spec.typeMatch;
+                        assertSchema(typeMatch, res.body);
 
                         // validate the response data values...
-                        if(typeof entry.dataMatch === 'function') {
+                        var dataMatch = entry.dataMatch || spec.dataMatch;
+                        if (typeof dataMatch === 'function') {
                             console.log("Checking response against custom function");
-                            (entry.dataMatch(res.body)).should.equal(true);
-                        } else if(typeof entry.dataMatch === 'object') {
+                            (dataMatch(res.body)).should.equal(true);
+                        } else if (typeof dataMatch === 'object') {
                             console.log("Checking response against custom object");
-                            (res.body).should.contain(entry.dataMatch);
+                            (res.body).should.contain(dataMatch);
                         } else {
                             console.log("Checking response against input");
                             (res.body).should.contain(entry.send);
                         }
 
-                        send.id = res.body.id;
+                        // capture the response cache fields...
+                        spec.resCacheData.push(spec.resCacheKeys(res.body));
+                        if (++count === dataset.length) {
+                            console.log("Cached: " + JSON.stringify(spec.resCacheData));
+                            done();
+                        }
                     });
             });
-            done();
         });
 
 
-        it(`GET ${spec.api}/{id} should find resource and respond with json`, function (done) {
+        it(`GET ${spec.baseapi} should find all resources and respond with json array`, function (done) {
 
-            api.get(logRequest(`${spec.api}/${spec.jsonInput.id}`))
+            request.get(logRequest(spec.baseapi))
                 .set('Accept', 'application/json')
                 .expect(200)
                 .end(function (err, res) {
-                    if (err) return done(err);
-                    logResponse(res);
-
-                    (res.body).should.contain.keys(['id', 'name']);
-                    (res.body.id).should.be.a(spec.jsonSchema.id);
-                    (res.body.name).should.be.a(spec.jsonSchema.name);
-                    (res.body.name).should.equal(spec.jsonInput.name);
-                    (res.body).should.contain(spec.jsonInput);
-
-                    done();
-                });
-
-        });
-
-
-        it(`GET ${spec.api} should find all resources and respond with json array`, function (done) {
-
-            api.get(logRequest(spec.api))
-                .set('Accept', 'application/json')
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) return done(err);
-                    logResponse(res);
+                    if (logResponse(err, res))
+                        return done(err);
 
                     (res.body).should.be.instanceof(Array);
-                    (res.body).should.contain.an.item(spec.jsonInput);
-                    (res.body).should.contain.an.item.with.property('id', spec.jsonInput.id);
-                    (res.body).should.contain.an.item.with.property('name', spec.jsonInput.name);
+                    (res.body).forEach(function (record) {
+                        assertSchema(spec.typeMatch, record);
+                    });
+
+                    var sampleRecords = spec.find();
+                    console.log("Checking sample records " + JSON.stringify(sampleRecords));
+                    sampleRecords.forEach(function (sample) {
+                        (res.body).should.contain.an.item(sample);
+                    });
 
                     done();
                 });
@@ -100,23 +101,42 @@ module.exports = function (spec) {
         });
 
 
-        it(`PATCH ${spec.api}/{id} should perform partial update of record`, function (done) {
+        it(`GET ${spec.baseapi}/{id} should find resource and respond with json`, function (done) {
 
-            spec.jsonPatch.id = spec.jsonInput.id;
-            api.patch(logRequest(`${spec.api}/${spec.jsonInput.id}`))
-                .send(spec.jsonPatch)
+            var count = 0;
+            var dataset = spec.resCacheData;
+            dataset.forEach(function (entry) {
+                request.get(logRequest(`${spec.baseapi}/${entry.id}`))
+                    .set('Accept', 'application/json')
+                    .expect(200)
+                    .end(function (err, res) {
+                        if (logResponse(err, res))
+                            return done(err);
+
+                        assertSchema(spec.typeMatch, res.body);
+                        (res.body).should.contain(entry);
+
+                        if (++count === dataset.length) {
+                            done();
+                        }
+                    });
+            });
+        });
+
+
+        it(`PATCH ${spec.baseapi}/{id} should perform partial update of record`, function (done) {
+
+            var patchData = spec.patch();
+            request.patch(logRequest(`${spec.baseapi}/${patchData.id}`))
+                .send(patchData)
                 .set('Accept', 'application/json')
                 .expect(200)
                 .end(function (err, res) {
-                    if (err) return done(err);
-                    logResponse(res);
+                    if (logResponse(err, res))
+                        return done(err);
 
-                    (res.body).should.contain.keys(['id', 'name', 'location']);
-                    (res.body.id).should.be.a(spec.jsonSchema.id);
-                    (res.body.name).should.be.a(spec.jsonSchema.name);
-                    (res.body.name).should.equal(spec.jsonInput.name);
-                    (res.body.location).should.equal(spec.jsonPatch.location);
-                    (res.body).should.contain(spec.jsonPatch);
+                    assertSchema(spec.typeMatch, res.body);
+                    (res.body).should.contain(patchData);
 
                     done();
                 });
@@ -126,22 +146,17 @@ module.exports = function (spec) {
 
         it(`PUT ${spec.api}/{id} should perform full replacement of record`, function (done) {
 
-            spec.jsonUpdate.id = spec.jsonInput.id;
-            api.put(logRequest(`${spec.api}/${spec.jsonInput.id}`))
-                .send(spec.jsonUpdate)
+            var updateData = spec.update();
+            request.put(logRequest(`${spec.baseapi}/${updateData.id}`))
+                .send(updateData)
                 .set('Accept', 'application/json')
                 .expect(200)
                 .end(function (err, res) {
-                    if (err) return done(err);
-                    logResponse(res);
+                    if (logResponse(err, res))
+                        return done(err);
 
-                    (res.body).should.contain.keys(['id', 'name', 'location']);
-                    (res.body.id).should.be.a(spec.jsonSchema.id);
-                    (res.body.name).should.be.a(spec.jsonSchema.name);
-                    (res.body.id).should.equal(spec.jsonUpdate.id);
-                    (res.body.name).should.equal(spec.jsonUpdate.name);
-                    (res.body.location).should.equal(spec.jsonUpdate.location);
-                    (res.body).should.contain(spec.jsonUpdate);
+                    assertSchema(spec.typeMatch, res.body);
+                    (res.body).should.contain(updateData);
 
                     done();
                 });
@@ -149,31 +164,39 @@ module.exports = function (spec) {
         });
 
 
-        it(`DELETE ${spec.api}/{id} should delete record`, function (done) {
+        it(`DELETE ${spec.baseapi}/{id} should delete record`, function (done) {
 
-            api.delete(logRequest(`${spec.api}/${spec.jsonInput.id}`))
-                .set('Accept', 'application/json')
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) return done(err);
-                    logResponse(res);
-                    done();
-                });
-
+            var count = 0;
+            var dataset = spec.delete();
+            dataset.forEach(function (entry) {
+                request.delete(logRequest(`${spec.baseapi}/${entry.id}`))
+                    .set('Accept', 'application/json')
+                    .expect(200)
+                    .end(function (err, res) {
+                        if (logResponse(err, res))
+                            return done(err);
+                        if (++count === dataset.length)
+                            done();
+                    });
+            });
         });
 
 
         it('should no longer find the record', function (done) {
 
-            api.get(logRequest(`${spec.api}/${spec.jsonInput.id}`))
-                .set('Accept', 'application/json')
-                .expect(204)
-                .end(function (err, res) {
-                    if (err) return done(err);
-                    logResponse(res);
-                    done();
-                });
-
+            var count = 0;
+            var dataset = spec.delete();
+            dataset.forEach(function (entry) {
+                request.get(logRequest(`${spec.baseapi}/${entry.id}`))
+                    .set('Accept', 'application/json')
+                    .expect(204)
+                    .end(function (err, res) {
+                        if (logResponse(err, res))
+                            return done(err);
+                        if (++count === dataset.length)
+                            done();
+                    });
+            });
         });
     });
 };

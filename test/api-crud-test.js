@@ -1,42 +1,49 @@
-require('./api-crud-executor.js')({
+var apiTester = require('./api-crud-executor.js');
+
+apiTester({
         name: 'PeopleAPI',
         baseurl: 'http://localhost:3000',
-        api: '/people',
-        post: [
-            {
-                send: {
-                    name: 'mocha'
-                },
-                typeMatch: {
-                    id: 'Number',
-                    name: 'String'
-                }
-            },
-            {
-                send: {
-                    name: 'chai'
-                },
-                typeMatch: {
-                    id: 'Number',
-                    name: 'String'
-                }
-            }
-        ],
-        jsonSchema: {
-            id: 'number',
-            name: 'String',
-            location: 'String'
+        baseapi: '/people',
+        resCacheData: [],
+        resCacheKeys: function (response) {
+            return {'id': response.id, 'name': response.name};
         },
-        jsonInput: {
-            name: 'mocha'
+        typeMatch: {
+            id: 'Number',
+            name: 'String'
         },
-        jsonPatch: {
-            name: 'mocha',
-            location: 'UK'
+        post: function () {
+            return [
+                {send: {name: 'mocha'}},
+                {send: {name: 'chai'}},
+                {send: {name: 'javascript'}},
+                {send: {name: 'superagent'}},
+                {send: {name: 'require'}}
+            ]
         },
-        jsonUpdate: {
-            name: 'chai',
-            location: 'USA'
+        find: function () {
+            return [
+                this.resCacheData[0],
+                this.resCacheData[Math.floor(this.resCacheData.length / 2)],
+                this.resCacheData[this.resCacheData.length - 1]
+            ];
+        },
+        patch: function () {
+            return {
+                id: this.resCacheData[0].id,
+                name: this.resCacheData[0].name,
+                location: "UK"
+            };
+        },
+        update: function () {
+            return {
+                id: this.resCacheData[0].id,
+                name: "override",
+                location: "USA"
+            };
+        },
+        delete: function () {
+            return this.resCacheData;
         }
     }
 );

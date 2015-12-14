@@ -11,6 +11,14 @@ class PeopleAPI {
             person.updated as updated`
     };
 
+    log(action, data, params) {
+        console.log("---------- " + action);
+        console.log(JSON.stringify(data));
+        console.log(JSON.stringify(params));
+        console.log("----------");
+    }
+
+
     constructor(db) {
         this.db = db;
         // test out connectivity...
@@ -23,14 +31,6 @@ class PeopleAPI {
                 console.log(JSON.stringify(data));
             }
         });
-    }
-
-
-    log(action, data, params) {
-        console.log("---------- " + action);
-        console.log(JSON.stringify(data));
-        console.log(JSON.stringify(params));
-        console.log("----------");
     }
 
 
