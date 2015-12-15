@@ -25,9 +25,13 @@ module.exports = function (spec) {
         // validate the response data types...
         for (var property in typeMatch) {
             if (typeMatch.hasOwnProperty(property)) {
-                console.log(`Checking ${record[property]} is type ${typeMatch[property].toLowerCase()}`);
-                (record).should.contain.key(property);
-                (record[property]).should.be.a(typeMatch[property]);
+                console.log(`Checking ${record[property]} is type ${typeMatch[property].type.toLowerCase()}`);
+                if(typeMatch[property].required) {
+                    (record).should.contain.key(property);
+                }
+                if(record[property]) {
+                    (record[property]).should.be.a(typeMatch[property].type);
+                }
             }
         }
     };
@@ -36,7 +40,7 @@ module.exports = function (spec) {
 
         it(`POST ${spec.baseapi} should create new resource from input data`, function (done) {
 
-            var dataset = spec.post();
+            var dataset = spec.create();
             var count = 0;
             dataset.forEach(function (entry) {
                 request.post(logRequest(spec.baseapi, entry.send))

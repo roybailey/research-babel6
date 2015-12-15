@@ -9,10 +9,11 @@ apiTester({
             return {'id': response.id, 'name': response.name};
         },
         typeMatch: {
-            id: 'Number',
-            name: 'String'
+            id: {type: 'Number', required: true},
+            name: {type: 'String', required: true},
+            location: {type: 'String', required: false}
         },
-        post: function () {
+        create: function () {
             return [
                 {send: {name: 'mocha'}},
                 {send: {name: 'chai'}},
