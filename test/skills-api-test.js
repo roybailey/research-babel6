@@ -1,9 +1,9 @@
 var apiTester = require('./api-crud-executor.js');
 
 apiTester({
-        name: 'PeopleAPI',
+        name: 'SkillsAPI',
         baseurl: 'http://localhost:3000',
-        baseapi: '/people',
+        baseapi: '/api/skills',
         resCacheData: [],
         resCacheKeys: function (response) {
             return {'id': response.id, 'name': response.name};
@@ -11,15 +11,16 @@ apiTester({
         typeMatch: {
             id: {type: 'Number', required: true},
             name: {type: 'String', required: true},
-            location: {type: 'String', required: false}
+            strategy: {type: 'String', required: false}
         },
         create: function () {
             return [
-                {send: {name: 'mocha'}},
-                {send: {name: 'chai'}},
-                {send: {name: 'javascript'}},
-                {send: {name: 'superagent'}},
-                {send: {name: 'require'}}
+                {send: {name: 'C++'}},
+                {send: {name: 'Java'}},
+                {send: {name: 'JavaScript'}},
+                {send: {name: 'Web'}},
+                {send: {name: 'Flex'}},
+                {send: {name: 'Mobile'}}
             ]
         },
         find: function () {
@@ -33,14 +34,14 @@ apiTester({
             return {
                 id: this.resCacheData[0].id,
                 name: this.resCacheData[0].name,
-                location: "UK"
+                strategy: "reduce"
             };
         },
         update: function () {
             return {
                 id: this.resCacheData[0].id,
                 name: "override",
-                location: "USA"
+                strategy: "review"
             };
         },
         delete: function () {

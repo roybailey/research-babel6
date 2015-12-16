@@ -54,7 +54,7 @@ class PeopleAPI {
 
         this.log("findPerson", null, params);
         let QUERY = `
-        MATCH (person:Resource)
+        MATCH (person:Person)
         ` +PeopleAPI.RETURN();
 
         this.db.query(QUERY, (err, results) => {
@@ -80,7 +80,7 @@ class PeopleAPI {
 
         this.log("getPerson", id, params);
         let QUERY = `
-        MATCH (person:Resource)
+        MATCH (person:Person)
         WHERE id(person) = ${id}
         ` +PeopleAPI.RETURN();
 
@@ -102,7 +102,7 @@ class PeopleAPI {
         this.log("createPerson", data, params);
         let PARAMS = {params: data};
         let QUERY = `
-        MERGE (person:Resource {name:'${params.name}'})
+        MERGE (person:Person {name:'${params.name}'})
         ON CREATE SET person += {params}
         ON CREATE SET person.created = timestamp()
         ON MATCH SET person.updated = timestamp()
@@ -125,7 +125,7 @@ class PeopleAPI {
 
         this.log("updatePerson", data, params);
         let QUERY = `
-        MATCH (person:Resource)
+        MATCH (person:Person)
         WHERE id(person) = {id}
         SET person.name = {name},
             person.location = {location},
@@ -148,7 +148,7 @@ class PeopleAPI {
 
         this.log("patchPerson", data, params);
         let QUERY = `
-        MATCH (person:Resource)
+        MATCH (person:Person)
         WHERE id(person) = ${data.id}
         SET person.name = '${data.name}',
             person.location = '${data.location}',
@@ -172,7 +172,7 @@ class PeopleAPI {
 
         this.log("removePerson", id, params);
         let QUERY = `
-        MATCH (person:Resource)
+        MATCH (person:Person)
         WHERE id(person) = ${id}
         DELETE person
         `;

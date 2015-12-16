@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en-gb" dir="ltr">
+
+<head>
+    <title>Upload Data</title>
+    <!--
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/4.2.0/min/dropzone.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.css"/>
+    -->
+    <script src="_assets/jquery/2.1.4/jquery.min.js"></script>
+    <script src="_assets/papaparse/4.1.2/papaparse.min.js"></script>
+
+    <script src="_assets/semantic-ui/2.1.6/semantic.min.js"></script>
+    <link rel="stylesheet" href="_assets/semantic-ui/2.1.6/semantic.min.css"/>
+</head>
+
+<body>
+
+<div class="pusher">
+    <div id="NavBar"></div>
+
+    <div class="ui vertical masthead center aligned segment">
+
+        <div class="ui segment">
+            <h2>People Upload</h2>
+            <input type="file" id="people-file" name="files"/>
+        </div>
+        <div class="ui segment">
+            <h2>Skills Upload</h2>
+            <input type="file" id="skills-file" name="files"/>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="dist/bundle.js"></script>
+<script>
+    var data;
+
+    function handleFileSelect(evt) {
+        var file = evt.target.files[0];
+
+        Papa.parse(file, {
+            header: true,
+            dynamicTyping: true,
+            complete: function(results) {
+                data = results.data;
+                console.log(JSON.stringify(data));
+            }
+        });
+    }
+
+    $(document).ready(function(){
+        $("#people-file").change(handleFileSelect);
+        $("#skills-file").change(handleFileSelect);
+    });
+</script>
+</body>
+</html>

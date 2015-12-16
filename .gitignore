@@ -15,5 +15,6 @@ build/
 target/
 node_modules/
 public/_assets
+uploads/
 
 /nbproject/private/
