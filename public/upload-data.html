@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en-gb" dir="ltr">
-
 <head>
     <title>Upload Data</title>
     <!--
@@ -12,12 +11,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.css"/>
     -->
     <script src="_assets/jquery/2.1.4/jquery.min.js"></script>
+    <script src="_assets/superagent/1.2.0/superagent.min.js"></script>
     <script src="_assets/papaparse/4.1.2/papaparse.min.js"></script>
 
     <script src="_assets/semantic-ui/2.1.6/semantic.min.js"></script>
     <link rel="stylesheet" href="_assets/semantic-ui/2.1.6/semantic.min.css"/>
+    <!--<script src="_assets/semantic-ui/2.1.6/components/progress.min.js"></script>-->
+    <!--<link rel="stylesheet" href="_assets/semantic-ui/2.1.6/components/progress.min.css"/>-->
 </head>
-
 <body>
 
 <div class="pusher">
@@ -28,10 +29,20 @@
         <div class="ui segment">
             <h2>People Upload</h2>
             <input type="file" id="people-file" name="files"/>
+
+            <div class="ui active indicating progress" data-value="50" data-total="100" id="upload-people">
+                <div class="bar"></div>
+                <div class="label">0 Processed</div>
+            </div>
         </div>
         <div class="ui segment">
             <h2>Skills Upload</h2>
             <input type="file" id="skills-file" name="files"/>
+
+            <div class="ui active indicating progress" data-value="75" data-total="100" id="upload-skills">
+                <div class="bar"></div>
+                <div class="label">0 Processed</div>
+            </div>
         </div>
 
     </div>
@@ -40,25 +51,110 @@
 
 <script src="dist/bundle.js"></script>
 <script>
-    var data;
 
-    function handleFileSelect(evt) {
+    var request = window.superagent;
+
+    function updateLoaded(tag, processed, total) {
+        d3.select(tag).select('.label').text("Processed " + processed + "/" + total);
+        $(tag).progress({
+            total: total,
+            value: processed
+        });
+        if (total === 0) {
+            debugger;
+            $(tag).progress('reset');
+            $(tag).progress({value: 0.00000001, total: 0});
+        }
+    }
+
+    function handlePeopleFile(evt) {
         var file = evt.target.files[0];
+        console.log("Loading file..." + file);
+        updateLoaded('#upload-people', 0, 0);
 
         Papa.parse(file, {
             header: true,
             dynamicTyping: true,
-            complete: function(results) {
-                data = results.data;
-                console.log(JSON.stringify(data));
+            complete: function (results) {
+                console.log(JSON.stringify(results.meta.fields));
+                var fieldCount = 0;
+                results.meta.fields.forEach(function (field) {
+                    if (field === 'Name' || field === 'Role')
+                        ++fieldCount;
+                });
+                if (fieldCount === 2) {
+                    console.log("Loading people...");
+                    var errors = 0;
+                    var processed = 0;
+                    results.data.forEach(function (data) {
+                        console.log(JSON.stringify(data));
+                        if (errors === 0) {
+                            request
+                                    .post('/api/people')
+                                    .send({name: data.Name, role: data.Role})
+                                    .set('Accept', 'application/json')
+                                    .end(function (err, res) {
+                                        ++processed;
+                                        if (err || !res.ok) {
+                                            alert('Oh no! error: ' + err);
+                                            ++errors;
+                                        } else {
+                                            updateLoaded('#upload-people', processed, results.data.length);
+                                        }
+                                    });
+                        }
+                    });
+                }
             }
         });
     }
 
-    $(document).ready(function(){
-        $("#people-file").change(handleFileSelect);
-        $("#skills-file").change(handleFileSelect);
+    function handleSkillsFile(evt) {
+        var file = evt.target.files[0];
+        updateLoaded('#upload-skills', 0, 0);
+
+        Papa.parse(file, {
+            header: true,
+            dynamicTyping: true,
+            complete: function (results) {
+                console.log(JSON.stringify(results.meta.fields));
+                var fieldCount = 0;
+                results.meta.fields.forEach(function (field) {
+                    if (field === 'Name' || field === 'Strategy')
+                        ++fieldCount;
+                });
+                if (fieldCount === 2) {
+                    console.log("Loading skills...");
+                    var errors = 0;
+                    var processed = 0;
+                    results.data.forEach(function (data) {
+                        console.log(JSON.stringify(data));
+                        if (errors === 0) {
+                            request
+                                    .post('/api/skills')
+                                    .send({name: data.Name, role: data.Role})
+                                    .set('Accept', 'application/json')
+                                    .end(function (err, res) {
+                                        ++processed;
+                                        if (err || !res.ok) {
+                                            alert('Oh no! error: ' + err);
+                                            ++errors;
+                                        } else {
+                                            updateLoaded('#upload-skills', processed, results.data.length);
+                                        }
+                                    });
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $("#people-file").change(handlePeopleFile);
+        $("#skills-file").change(handleSkillsFile);
     });
+
 </script>
 </body>
 </html>
