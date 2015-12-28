@@ -3,16 +3,32 @@
 
 <head>
     <title>DataFlows</title>
+    <!--
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.1.6/semantic.min.css"/>
-    <!--
+    -->
     <script src="_assets/jquery/2.1.4/jquery.min.js"></script>
     <script src="_assets/semantic-ui/2.1.6/semantic.min.js"></script>
     <link rel="stylesheet" href="_assets/semantic-ui/2.1.6/semantic.min.css"/>
-    -->
-</head>
+    <script src="_assets/cytoscape/2.5.0/cytoscape.min.js"></script>
+    <script src="./dataflows.js"></script>
+    <style>
+        body {
+            font: 12px helvetica neue, helvetica, arial, sans-serif;
+        }
 
+        #DataFlows {
+            height: 500px;
+            width: 80%;
+            margin: 5%;
+            /*position: absolute;
+            left: 0;
+            top: 0;*/
+            border: 1px solid black;
+        }
+    </style>
+</head>
 <body>
 
 <div class="uk-container uk-container-center uk-margin-top uk-margin-large-bottom">
@@ -23,11 +39,10 @@
         <div class="uk-width-1-1">
             <h1 class="uk-heading-large">Dataflows</h1>
 
-            <p class="uk-text-large">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut.</p>
+            <div id="DataFlows"></div>
         </div>
     </div>
 
-    <div id="DataFlows"></div>
 
 </div>
 

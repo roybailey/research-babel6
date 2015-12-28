@@ -5383,16 +5383,27 @@
 	
 	if (document.querySelector("#Features")) {
 	
-	    d3.csv("./data/technical-estate.csv", function (dataset) {
+	    d3.json("/api/feature", function (dataset) {
 	        console.log((0, _stringify2.default)(dataset));
-	        var categorySet = d3.nest().key(function (it) {
-	            return it['Category'];
-	        }).entries(dataset);
+	        var cards = dataset.map(function (item) {
+	            return {
+	                id: item.id,
+	                header: item.Name
+	            };
+	        });
+	        console.log((0, _stringify2.default)(cards));
+	        var categorySet = [{
+	            key: 'Features',
+	            values: dataset.map(function (item) {
+	                return {
+	                    id: item.id,
+	                    header: item.name
+	                };
+	            })
+	        }];
 	        console.log((0, _stringify2.default)(categorySet));
 	        var props = {
-	            categories: categorySet.map(function (it) {
-	                return it.key;
-	            })
+	            categories: categorySet
 	        };
 	        _reactDom2.default.render(_react2.default.createElement(_PortfolioSemantic2.default, props), document.querySelector("#Features"));
 	    });
@@ -5437,7 +5448,7 @@
 	
 	if (document.querySelector("#DataFlows")) {
 	
-	    _superagent2.default.get('http://localhost:4567/api/v1/nodes').set('Accept', 'application/json').end(function (err, res) {
+	    _superagent2.default.get('/api/technologies').set('Accept', 'application/json').end(function (err, res) {
 	        if (err) {
 	            console.log((0, _stringify2.default)(err, undefined, 2));
 	        } else {
@@ -5467,19 +5478,18 @@
 	
 	if (document.querySelector("#Technologies")) {
 	
-	    d3.csv("./data/technical-estate.csv", function (dataset) {
+	    d3.json("/api/technology", function (dataset) {
 	        console.log((0, _stringify2.default)(dataset));
 	        var props = {
 	            dataset: []
 	        };
-	        dataset.filter(function (it) {
-	            return it.Category === "Technical Component";
-	        }).forEach(function (item) {
+	        dataset.forEach(function (item) {
 	            props.dataset.push({
-	                group: item.Category,
-	                title: item.Name,
-	                status: item.Strategy,
-	                score: item.Score
+	                id: item.id,
+	                group: item.category,
+	                title: item.name,
+	                status: item.strategy,
+	                score: item.score
 	            });
 	        });
 	        _reactDom2.default.render(_react2.default.createElement(_StatusTableSemantic2.default, props), document.querySelector("#Technologies"));
@@ -5517,7 +5527,7 @@
 	// Sample Neo4j Request
 	// ------------------------------------------------------
 	
-	_superagent2.default.get('http://localhost:3000/todos').end(function (err, res) {
+	_superagent2.default.get('http://localhost:3000/api/skills').end(function (err, res) {
 	    if (err) {
 	        console.log((0, _stringify2.default)(err, undefined, 2));
 	    } else {
@@ -33960,12 +33970,12 @@
 	        value: function render() {
 	            var _this2 = this;
 	
-	            var menu = [{ href: "dashboard.html", icon: "home icon", title: "Knowledge Center" }, { href: "delivery.html", icon: "file text icon", title: "Delivery" }, { href: "schedule.html", icon: "calendar icon", title: "Schedule" }, { href: "features.html", icon: "comments outline icon", title: "Features" }, { href: "technologies.html", icon: "desktop icon", title: "Technologies" }, { href: "codebase.html", icon: "github icon", title: "Codebase" }];
+	            var menu = [{ href: "dashboard.html", icon: "home icon", title: "Knowledge Center" }, { href: "delivery.html", icon: "file text icon", title: "Delivery" }, { href: "schedule.html", icon: "calendar icon", title: "Schedule" }, { href: "features.html", icon: "comments outline icon", title: "Features" }, { href: "technologies.html", icon: "desktop icon", title: "Technologies" }, { href: "codebase.html", icon: "github icon", title: "Codebase" }, { href: "dataflows.html", icon: "sitemap icon", title: "DataFlows" }];
 	            var mainMenu = [];
 	            menu.forEach(function (item) {
 	                mainMenu.push(_react2.default.createElement(
 	                    'a',
-	                    { className: 'item ' + (_this2.props.page === item.href ? 'active' : ''), href: item.href },
+	                    { className: 'item ' + (_this2.props.page === item.href ? 'active' : ''), href: item.href, key: item.href },
 	                    _react2.default.createElement('i', { className: item.icon }),
 	                    ' ',
 	                    item.title
@@ -33991,22 +34001,20 @@
 	                    _react2.default.createElement(
 	                        'div',
 	                        { className: 'ui dropdown item' },
-	                        'Developer',
+	                        'Tools',
 	                        _react2.default.createElement('i', { className: 'dropdown icon' }),
 	                        _react2.default.createElement(
 	                            'div',
 	                            { className: 'menu' },
 	                            _react2.default.createElement(
 	                                'a',
-	                                { className: 'item', href: '' },
-	                                _react2.default.createElement('i', { className: 'archive icon' }),
-	                                ' JIRA'
+	                                { className: 'item', href: 'upload-data.html' },
+	                                'Upload Data'
 	                            ),
 	                            _react2.default.createElement(
 	                                'a',
-	                                { className: 'item', href: 'support.html' },
-	                                _react2.default.createElement('i', { className: 'doctor icon' }),
-	                                ' Support'
+	                                { className: 'item', href: 'upload-file.html' },
+	                                'Upload File'
 	                            )
 	                        )
 	                    )
@@ -34952,18 +34960,20 @@
 	            var categoriesList = [];
 	            var cardTabs = [];
 	            this.props.categories.forEach(function (category) {
+	                console.log("categoriesList:" + category.key);
 	                categoriesList.push(_react2.default.createElement(
 	                    'div',
-	                    { key: category, className: 'item', 'data-tab': category },
-	                    category
+	                    { key: 'tab-' + category.key, className: 'item', 'data-tab': category.key },
+	                    category.title || category.key
 	                ));
 	                var cardList = [];
-	                ['one', 'two', 'three'].forEach(function (card) {
-	                    cardList.push(_react2.default.createElement(_CardSemantic2.default, { id: 'card-' + card, header: category + "-" + card }));
+	                category.values.forEach(function (card) {
+	                    console.log("card:" + card.id);
+	                    cardList.push(_react2.default.createElement(_CardSemantic2.default, { key: card.id, id: card.id, header: card.header }));
 	                });
 	                cardTabs.push(_react2.default.createElement(
 	                    'div',
-	                    { className: 'ui bottom attached tab segment', 'data-tab': category },
+	                    { key: category.key, className: 'ui bottom attached tab segment', 'data-tab': category.key },
 	                    _react2.default.createElement(
 	                        'div',
 	                        { className: 'ui cards' },

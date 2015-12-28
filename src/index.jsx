@@ -20,14 +20,27 @@ if (document.querySelector("#NavBar")) {
 
 if (document.querySelector("#Features")) {
 
-    d3.csv("./data/technical-estate.csv", (dataset)=> {
+    d3.json("/api/feature", (dataset)=> {
         console.log(JSON.stringify(dataset));
-        var categorySet = d3.nest().key((it)=> {
-            return it['Category'];
-        }).entries(dataset);
+        var cards = dataset.map((item)=> {
+            return {
+                id: item.id,
+                header: item.Name
+            }
+        });
+        console.log(JSON.stringify(cards));
+        var categorySet = [{
+            key: 'Features',
+            values: dataset.map((item)=> {
+                return {
+                    id: item.id,
+                    header: item.name
+                }
+            })
+        }];
         console.log(JSON.stringify(categorySet));
         var props = {
-            categories: categorySet.map((it)=> it.key)
+            categories: categorySet
         };
         ReactDOM.render(<Portfolio {...props}/>, document.querySelector("#Features"));
     });
@@ -76,7 +89,7 @@ if (document.querySelector("#Delivery")) {
 if (document.querySelector("#DataFlows")) {
 
     request
-        .get('http://localhost:4567/api/v1/nodes')
+        .get('/api/technologies')
         .set('Accept', 'application/json')
         .end(function (err, res) {
             if (err) {
@@ -106,17 +119,18 @@ if (document.querySelector("#DataFlows")) {
 
 if (document.querySelector("#Technologies")) {
 
-    d3.csv("./data/technical-estate.csv", (dataset)=> {
+    d3.json("/api/technology", (dataset)=> {
         console.log(JSON.stringify(dataset));
         var props = {
             dataset: []
         };
-        dataset.filter((it)=> it.Category === "Technical Component").forEach((item=> {
+        dataset.forEach((item=> {
             props.dataset.push({
-                group: item.Category,
-                title: item.Name,
-                status: item.Strategy,
-                score: item.Score
+                id: item.id,
+                group: item.category,
+                title: item.name,
+                status: item.strategy,
+                score: item.score
             })
         }));
         ReactDOM.render(<StatusTable {...props}/>, document.querySelector("#Technologies"));
@@ -159,7 +173,7 @@ if (document.querySelector("#TwoListsForm")) {
 // ------------------------------------------------------
 
 request
-    .get('http://localhost:3000/todos')
+    .get('http://localhost:3000/api/skills')
     .end(function (err, res) {
         if (err) {
             console.log(JSON.stringify(err, undefined, 2));

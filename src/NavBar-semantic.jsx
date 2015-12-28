@@ -14,12 +14,13 @@ class MainNavBar extends React.Component {
             { href: "schedule.html", icon: "calendar icon", title: "Schedule" },
             { href: "features.html", icon: "comments outline icon", title: "Features" },
             { href: "technologies.html", icon: "desktop icon", title: "Technologies" },
-            { href: "codebase.html", icon: "github icon", title: "Codebase" }
+            { href: "codebase.html", icon: "github icon", title: "Codebase" },
+            { href: "dataflows.html", icon: "sitemap icon", title: "DataFlows" }
         ];
         var mainMenu = [];
         menu.forEach((item)=> {
             mainMenu.push(
-                <a className={'item '+(this.props.page===item.href? 'active' : '')} href={item.href}>
+                <a className={'item '+(this.props.page===item.href? 'active' : '')} href={item.href} key={item.href}>
                     <i className={item.icon}></i> {item.title}
                 </a>
             );
@@ -36,15 +37,15 @@ class MainNavBar extends React.Component {
                         </div>
                     </div>
                     <div className="ui dropdown item">
-                        Developer
+                        Tools
                         <i className="dropdown icon"></i>
 
                         <div className="menu">
-                            <a className="item" href="">
-                                <i className="archive icon"></i> JIRA
+                            <a className="item" href="upload-data.html">
+                                Upload Data
                             </a>
-                            <a className="item" href="support.html">
-                                <i className="doctor icon"></i> Support
+                            <a className="item" href="upload-file.html">
+                                Upload File
                             </a>
                         </div>
                     </div>

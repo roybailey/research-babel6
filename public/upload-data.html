@@ -13,6 +13,7 @@
     <script src="_assets/jquery/2.1.4/jquery.min.js"></script>
     <script src="_assets/superagent/1.2.0/superagent.min.js"></script>
     <script src="_assets/papaparse/4.1.2/papaparse.min.js"></script>
+    <script src="_assets/lodash/3.10.1/lodash-min.js"></script>
 
     <script src="_assets/semantic-ui/2.1.6/semantic.min.js"></script>
     <link rel="stylesheet" href="_assets/semantic-ui/2.1.6/semantic.min.css"/>
@@ -27,26 +28,16 @@
     <div class="ui vertical masthead center aligned segment">
 
         <div class="ui segment">
-            <h2>People Upload</h2>
-            <input type="file" id="people-file" name="files"/>
+            <h2>Upload Data</h2>
+            <input type="file" id="data-file" name="files"/>
 
-            <div class="ui active indicating progress" data-value="50" data-total="100" id="upload-people">
-                <div class="bar"></div>
-                <div class="label">0 Processed</div>
-            </div>
-        </div>
-        <div class="ui segment">
-            <h2>Skills Upload</h2>
-            <input type="file" id="skills-file" name="files"/>
-
-            <div class="ui active indicating progress" data-value="75" data-total="100" id="upload-skills">
+            <div class="ui active indicating progress" id="upload-data">
                 <div class="bar"></div>
                 <div class="label">0 Processed</div>
             </div>
         </div>
 
     </div>
-
 </div>
 
 <script src="dist/bundle.js"></script>
@@ -60,79 +51,66 @@
             total: total,
             value: processed
         });
-        if (total === 0) {
-            debugger;
+        if (processed === 0) {
+            console.log("reset progress bar");
             $(tag).progress('reset');
             $(tag).progress({value: 0.00000001, total: 0});
         }
     }
 
-    function handlePeopleFile(evt) {
+    function handleDataFile(evt) {
         var file = evt.target.files[0];
         console.log("Loading file..." + file);
-        updateLoaded('#upload-people', 0, 0);
+        updateLoaded('#upload-data', 0, 100);
 
         Papa.parse(file, {
             header: true,
             dynamicTyping: true,
             complete: function (results) {
                 console.log(JSON.stringify(results.meta.fields));
-                var fieldCount = 0;
-                results.meta.fields.forEach(function (field) {
-                    if (field === 'Name' || field === 'Role')
-                        ++fieldCount;
-                });
-                if (fieldCount === 2) {
-                    console.log("Loading people...");
-                    var errors = 0;
-                    var processed = 0;
-                    results.data.forEach(function (data) {
-                        console.log(JSON.stringify(data));
-                        if (errors === 0) {
-                            request
-                                    .post('/api/people')
-                                    .send({name: data.Name, role: data.Role})
-                                    .set('Accept', 'application/json')
-                                    .end(function (err, res) {
-                                        ++processed;
-                                        if (err || !res.ok) {
-                                            alert('Oh no! error: ' + err);
-                                            ++errors;
-                                        } else {
-                                            updateLoaded('#upload-people', processed, results.data.length);
-                                        }
-                                    });
-                        }
-                    });
+                var dataType;
+                var dataMap;
+                if (_.includes(results.meta.fields, 'Name', 'Role')) {
+                    dataType = '/api/people';
+                    dataMap = function (data) {
+                        return {name: data.Name, role: data.Role};
+                    }
                 }
-            }
-        });
-    }
-
-    function handleSkillsFile(evt) {
-        var file = evt.target.files[0];
-        updateLoaded('#upload-skills', 0, 0);
-
-        Papa.parse(file, {
-            header: true,
-            dynamicTyping: true,
-            complete: function (results) {
-                console.log(JSON.stringify(results.meta.fields));
-                var fieldCount = 0;
-                results.meta.fields.forEach(function (field) {
-                    if (field === 'Name' || field === 'Strategy')
-                        ++fieldCount;
-                });
-                if (fieldCount === 2) {
-                    console.log("Loading skills...");
+                if (_.includes(results.meta.fields, 'Skill', 'Strategy')) {
+                    dataType = '/api/skills';
+                    dataMap = function (data) {
+                        return {name: data.Skill, strategy: data.Strategy};
+                    }
+                }
+                if (_.includes(results.meta.fields, 'Technology', 'Strategy')) {
+                    dataType = '/api/technology';
+                    dataMap = function (data) {
+                        return {name: data.Technology, strategy: data.Strategy};
+                    }
+                }
+                if (_.includes(results.meta.fields, 'Feature', 'Strategy')) {
+                    dataType = '/api/feature';
+                    dataMap = function (data) {
+                        return {name: data.Feature, strategy: data.Strategy};
+                    }
+                }
+                if (_.includes(results.meta.fields, 'Repo', 'Strategy')) {
+                    dataType = '/api/codebase';
+                    dataMap = function (data) {
+                        return {org: data.Org, name: data.Repo, strategy: data.Strategy};
+                    }
+                }
+                if (dataType && dataMap) {
+                    console.
+                            log("Loading " + dataType);
                     var errors = 0;
                     var processed = 0;
                     results.data.forEach(function (data) {
                         console.log(JSON.stringify(data));
                         if (errors === 0) {
                             request
-                                    .post('/api/skills')
-                                    .send({name: data.Name, role: data.Role})
+                                    .post(dataType)
+                                    .send(dataMap(data))
                                     .set('Accept', 'application/json')
                                     .end(function (err, res) {
                                         ++processed;
@@ -140,19 +118,20 @@
                                             alert('Oh no! error: ' + err);
                                             ++errors;
                                         } else {
-                                            updateLoaded('#upload-skills', processed, results.data.length);
+                                            updateLoaded('#upload-data', processed, results.data.length);
                                         }
                                     });
                         }
                     });
+                } else {
+                    alert('Data not recognised');
                 }
             }
         });
     }
 
     $(document).ready(function () {
-        $("#people-file").change(handlePeopleFile);
-        $("#skills-file").change(handleSkillsFile);
+        $("#data-file").change(handleDataFile);
     });
 
 </script>
