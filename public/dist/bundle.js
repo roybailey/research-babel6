@@ -4569,9 +4569,8 @@
 	
 	  var hasOwn = Object.prototype.hasOwnProperty;
 	  var undefined; // More compressible than void 0.
-	  var $Symbol = typeof Symbol === "function" ? Symbol : {};
-	  var iteratorSymbol = $Symbol.iterator || "@@iterator";
-	  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
+	  var iteratorSymbol =
+	    typeof Symbol === "function" && Symbol.iterator || "@@iterator";
 	
 	  var inModule = typeof module === "object";
 	  var runtime = global.regeneratorRuntime;
@@ -4641,7 +4640,7 @@
 	  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
 	  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
 	  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-	  GeneratorFunctionPrototype[toStringTagSymbol] = GeneratorFunction.displayName = "GeneratorFunction";
+	  GeneratorFunction.displayName = "GeneratorFunction";
 	
 	  // Helper for defining the .next, .throw, and .return methods of the
 	  // Iterator interface in terms of a single ._invoke method.
@@ -4668,9 +4667,6 @@
 	      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
 	    } else {
 	      genFun.__proto__ = GeneratorFunctionPrototype;
-	      if (!(toStringTagSymbol in genFun)) {
-	        genFun[toStringTagSymbol] = "GeneratorFunction";
-	      }
 	    }
 	    genFun.prototype = Object.create(Gp);
 	    return genFun;
@@ -4690,54 +4686,46 @@
 	  }
 	
 	  function AsyncIterator(generator) {
-	    function invoke(method, arg, resolve, reject) {
-	      var record = tryCatch(generator[method], generator, arg);
-	      if (record.type === "throw") {
-	        reject(record.arg);
-	      } else {
-	        var result = record.arg;
-	        var value = result.value;
-	        if (value instanceof AwaitArgument) {
-	          return Promise.resolve(value.arg).then(function(value) {
-	            invoke("next", value, resolve, reject);
-	          }, function(err) {
-	            invoke("throw", err, resolve, reject);
+	    // This invoke function is written in a style that assumes some
+	    // calling function (or Promise) will handle exceptions.
+	    function invoke(method, arg) {
+	      var result = generator[method](arg);
+	      var value = result.value;
+	      return value instanceof AwaitArgument
+	        ? Promise.resolve(value.arg).then(invokeNext, invokeThrow)
+	        : Promise.resolve(value).then(function(unwrapped) {
+	            // When a yielded Promise is resolved, its final value becomes
+	            // the .value of the Promise<{value,done}> result for the
+	            // current iteration. If the Promise is rejected, however, the
+	            // result for this iteration will be rejected with the same
+	            // reason. Note that rejections of yielded Promises are not
+	            // thrown back into the generator function, as is the case
+	            // when an awaited Promise is rejected. This difference in
+	            // behavior between yield and await is important, because it
+	            // allows the consumer to decide what to do with the yielded
+	            // rejection (swallow it and continue, manually .throw it back
+	            // into the generator, abandon iteration, whatever). With
+	            // await, by contrast, there is no opportunity to examine the
+	            // rejection reason outside the generator function, so the
+	            // only option is to throw it from the await expression, and
+	            // let the generator function handle the exception.
+	            result.value = unwrapped;
+	            return result;
 	          });
-	        }
-	
-	        return Promise.resolve(value).then(function(unwrapped) {
-	          // When a yielded Promise is resolved, its final value becomes
-	          // the .value of the Promise<{value,done}> result for the
-	          // current iteration. If the Promise is rejected, however, the
-	          // result for this iteration will be rejected with the same
-	          // reason. Note that rejections of yielded Promises are not
-	          // thrown back into the generator function, as is the case
-	          // when an awaited Promise is rejected. This difference in
-	          // behavior between yield and await is important, because it
-	          // allows the consumer to decide what to do with the yielded
-	          // rejection (swallow it and continue, manually .throw it back
-	          // into the generator, abandon iteration, whatever). With
-	          // await, by contrast, there is no opportunity to examine the
-	          // rejection reason outside the generator function, so the
-	          // only option is to throw it from the await expression, and
-	          // let the generator function handle the exception.
-	          result.value = unwrapped;
-	          resolve(result);
-	        }, reject);
-	      }
 	    }
 	
 	    if (typeof process === "object" && process.domain) {
 	      invoke = process.domain.bind(invoke);
 	    }
 	
+	    var invokeNext = invoke.bind(generator, "next");
+	    var invokeThrow = invoke.bind(generator, "throw");
+	    var invokeReturn = invoke.bind(generator, "return");
 	    var previousPromise;
 	
 	    function enqueue(method, arg) {
 	      function callInvokeWithMethodAndArg() {
-	        return new Promise(function(resolve, reject) {
-	          invoke(method, arg, resolve, reject);
-	        });
+	        return invoke(method, arg);
 	      }
 	
 	      return previousPromise =
@@ -4758,7 +4746,9 @@
 	          // Avoid propagating failures to Promises returned by later
 	          // invocations of the iterator.
 	          callInvokeWithMethodAndArg
-	        ) : callInvokeWithMethodAndArg();
+	        ) : new Promise(function (resolve) {
+	          resolve(callInvokeWithMethodAndArg());
+	        });
 	    }
 	
 	    // Define the unified helper method that is used to implement .next,
@@ -4866,12 +4856,13 @@
 	        }
 	
 	        if (method === "next") {
+	          context._sent = arg;
+	
 	          if (state === GenStateSuspendedYield) {
 	            context.sent = arg;
 	          } else {
 	            context.sent = undefined;
 	          }
-	
 	        } else if (method === "throw") {
 	          if (state === GenStateSuspendedStart) {
 	            state = GenStateCompleted;
@@ -4932,8 +4923,6 @@
 	  Gp[iteratorSymbol] = function() {
 	    return this;
 	  };
-	
-	  Gp[toStringTagSymbol] = "Generator";
 	
 	  Gp.toString = function() {
 	    return "[object Generator]";
@@ -5362,11 +5351,11 @@
 	
 	var _StatusTableSemantic2 = _interopRequireDefault(_StatusTableSemantic);
 	
-	var _JIRAReport = __webpack_require__(452);
+	var _JIRAReport = __webpack_require__(453);
 	
 	var _JIRAReport2 = _interopRequireDefault(_JIRAReport);
 	
-	var _SampleRedux = __webpack_require__(453);
+	var _SampleRedux = __webpack_require__(454);
 	
 	var _SampleRedux2 = _interopRequireDefault(_SampleRedux);
 	
@@ -5614,6 +5603,7 @@
 	});
 	
 	React.__SECRET_DOM_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactDOM;
+	React.__SECRET_DOM_SERVER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactDOMServer;
 	
 	module.exports = React;
 
@@ -15867,6 +15857,7 @@
 	    multiple: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    muted: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    name: null,
+	    nonce: MUST_USE_ATTRIBUTE,
 	    noValidate: HAS_BOOLEAN_VALUE,
 	    open: HAS_BOOLEAN_VALUE,
 	    optimum: null,
@@ -15878,6 +15869,7 @@
 	    readOnly: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    rel: null,
 	    required: HAS_BOOLEAN_VALUE,
+	    reversed: HAS_BOOLEAN_VALUE,
 	    role: MUST_USE_ATTRIBUTE,
 	    rows: MUST_USE_ATTRIBUTE | HAS_POSITIVE_NUMERIC_VALUE,
 	    rowSpan: null,
@@ -24080,7 +24072,7 @@
 	
 	'use strict';
 	
-	module.exports = '0.14.2';
+	module.exports = '0.14.3';
 
 /***/ },
 /* 341 */
@@ -31181,38 +31173,10 @@
 /* 380 */
 /***/ function(module, exports) {
 
+	var toString = {}.toString;
 	
-	/**
-	 * isArray
-	 */
-	
-	var isArray = Array.isArray;
-	
-	/**
-	 * toString
-	 */
-	
-	var str = Object.prototype.toString;
-	
-	/**
-	 * Whether or not the given `val`
-	 * is an array.
-	 *
-	 * example:
-	 *
-	 *        isArray([]);
-	 *        // > true
-	 *        isArray(arguments);
-	 *        // > false
-	 *        isArray('');
-	 *        // > false
-	 *
-	 * @param {mixed} val
-	 * @return {bool}
-	 */
-	
-	module.exports = isArray || function (val) {
-	  return !! val && '[object Array]' == str.call(val);
+	module.exports = Array.isArray || function (arr) {
+	  return toString.call(arr) == '[object Array]';
 	};
 
 
@@ -32689,8 +32653,12 @@
 	
 	// NOTE: These type checking functions intentionally don't use `instanceof`
 	// because it is fragile and can be easily faked with `Object.create()`.
-	function isArray(ar) {
-	  return Array.isArray(ar);
+	
+	function isArray(arg) {
+	  if (Array.isArray) {
+	    return Array.isArray(arg);
+	  }
+	  return objectToString(arg) === '[object Array]';
 	}
 	exports.isArray = isArray;
 	
@@ -32730,7 +32698,7 @@
 	exports.isUndefined = isUndefined;
 	
 	function isRegExp(re) {
-	  return isObject(re) && objectToString(re) === '[object RegExp]';
+	  return objectToString(re) === '[object RegExp]';
 	}
 	exports.isRegExp = isRegExp;
 	
@@ -32740,13 +32708,12 @@
 	exports.isObject = isObject;
 	
 	function isDate(d) {
-	  return isObject(d) && objectToString(d) === '[object Date]';
+	  return objectToString(d) === '[object Date]';
 	}
 	exports.isDate = isDate;
 	
 	function isError(e) {
-	  return isObject(e) &&
-	      (objectToString(e) === '[object Error]' || e instanceof Error);
+	  return (objectToString(e) === '[object Error]' || e instanceof Error);
 	}
 	exports.isError = isError;
 	
@@ -32765,14 +32732,12 @@
 	}
 	exports.isPrimitive = isPrimitive;
 	
-	function isBuffer(arg) {
-	  return Buffer.isBuffer(arg);
-	}
-	exports.isBuffer = isBuffer;
+	exports.isBuffer = Buffer.isBuffer;
 	
 	function objectToString(o) {
 	  return Object.prototype.toString.call(o);
 	}
+	
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(377).Buffer))
 
 /***/ },
@@ -44733,6 +44698,10 @@
 	
 	var _d2 = _interopRequireDefault(_d);
 	
+	var _RatingSemantic = __webpack_require__(452);
+	
+	var _RatingSemantic2 = _interopRequireDefault(_RatingSemantic);
+	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	var StatusTable = (function (_React$Component) {
@@ -44745,17 +44714,11 @@
 	
 	    (0, _createClass3.default)(StatusTable, [{
 	        key: 'componentDidMount',
-	        value: function componentDidMount() {
-	            $('.ui.rating').rating();
-	            $('.ui.rating').rating('setting', 'onRate', function (value) {
-	                console.log("onRate");
-	                console.log(value);
-	            });
-	        }
+	        value: function componentDidMount() {}
 	    }, {
 	        key: 'onRating',
 	        value: function onRating(p1, p2) {
-	            console.log("Rating change");
+	            console.log("Parent Rating change notification");
 	            console.log(p1);
 	            console.log(p2);
 	        }
@@ -44785,14 +44748,7 @@
 	                tableRows.push(_react2.default.createElement(
 	                    'div',
 	                    { className: 'four wide column' },
-	                    _react2.default.createElement(
-	                        'div',
-	                        { className: 'ui star rating',
-	                            onClick: that.onRating.bind(_this2, item),
-	                            'data-max-rating': '5',
-	                            'data-rating': item.score },
-	                        item.score
-	                    )
+	                    _react2.default.createElement(_RatingSemantic2.default, { item: item, rating: item.score, handler: _this2.onRating })
 	                ));
 	            });
 	            console.log(tableRows);
@@ -44810,6 +44766,85 @@
 
 /***/ },
 /* 452 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	
+	var _getPrototypeOf = __webpack_require__(400);
+	
+	var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+	
+	var _classCallCheck2 = __webpack_require__(411);
+	
+	var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+	
+	var _createClass2 = __webpack_require__(412);
+	
+	var _createClass3 = _interopRequireDefault(_createClass2);
+	
+	var _possibleConstructorReturn2 = __webpack_require__(416);
+	
+	var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+	
+	var _inherits2 = __webpack_require__(441);
+	
+	var _inherits3 = _interopRequireDefault(_inherits2);
+	
+	var _react = __webpack_require__(195);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(352);
+	
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+	
+	var _d = __webpack_require__(449);
+	
+	var _d2 = _interopRequireDefault(_d);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	var Rating = (function (_React$Component) {
+	    (0, _inherits3.default)(Rating, _React$Component);
+	
+	    function Rating() {
+	        (0, _classCallCheck3.default)(this, Rating);
+	        return (0, _possibleConstructorReturn3.default)(this, (0, _getPrototypeOf2.default)(Rating).apply(this, arguments));
+	    }
+	
+	    (0, _createClass3.default)(Rating, [{
+	        key: 'componentDidMount',
+	        value: function componentDidMount() {
+	            var that = this;
+	            // this works where onClick with 'get rating' query didn't...
+	            $(_reactDom2.default.findDOMNode(this)).rating('setting', 'onRate', function (value) {
+	                console.log("onRate( " + that.props.item + ", " + value + " )");
+	                that.props.handler(that.props.item, value);
+	            });
+	        }
+	    }, {
+	        key: 'render',
+	        value: function render() {
+	            return _react2.default.createElement(
+	                'div',
+	                { className: 'ui star rating',
+	                    'data-max-rating': '5',
+	                    'data-rating': this.props.rating },
+	                this.props.rating
+	            );
+	        }
+	    }]);
+	    return Rating;
+	})(_react2.default.Component);
+	
+	exports.default = Rating;
+
+/***/ },
+/* 453 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -44894,7 +44929,7 @@
 	exports.default = JIRAReport;
 
 /***/ },
-/* 453 */
+/* 454 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -45056,7 +45091,7 @@
 
 	var _stringify2 = _interopRequireDefault(_stringify);
 
-	var _extends2 = __webpack_require__(454);
+	var _extends2 = __webpack_require__(455);
 
 	var _extends3 = _interopRequireDefault(_extends2);
 
@@ -45076,19 +45111,19 @@
 
 	var _redux = __webpack_require__(360);
 
-	var _SampleReduxTwoLists = __webpack_require__(459);
+	var _SampleReduxTwoLists = __webpack_require__(460);
 
 	var _SampleReduxTwoLists2 = _interopRequireDefault(_SampleReduxTwoLists);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /***/ },
-/* 454 */
+/* 455 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 	
-	var _assign = __webpack_require__(455);
+	var _assign = __webpack_require__(456);
 	
 	var _assign2 = _interopRequireDefault(_assign);
 	
@@ -45111,29 +45146,29 @@
 	exports.__esModule = true;
 
 /***/ },
-/* 455 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(456), __esModule: true };
-
-/***/ },
 /* 456 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(457);
-	module.exports = __webpack_require__(194).Object.assign;
+	module.exports = { "default": __webpack_require__(457), __esModule: true };
 
 /***/ },
 /* 457 */
 /***/ function(module, exports, __webpack_require__) {
 
-	// 19.1.3.1 Object.assign(target, source)
-	var $export = __webpack_require__(406);
-	
-	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(458)});
+	__webpack_require__(458);
+	module.exports = __webpack_require__(194).Object.assign;
 
 /***/ },
 /* 458 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// 19.1.3.1 Object.assign(target, source)
+	var $export = __webpack_require__(406);
+	
+	$export($export.S + $export.F, 'Object', {assign: __webpack_require__(459)});
+
+/***/ },
+/* 459 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 19.1.2.1 Object.assign(target, source, ...)
@@ -45171,7 +45206,7 @@
 	} : Object.assign;
 
 /***/ },
-/* 459 */
+/* 460 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -45180,7 +45215,7 @@
 	    value: true
 	});
 	
-	var _keys = __webpack_require__(460);
+	var _keys = __webpack_require__(461);
 	
 	var _keys2 = _interopRequireDefault(_keys);
 	
@@ -45417,20 +45452,20 @@
 	exports.default = (0, _reactRedux.connect)(mapStateToProps, mapDispatchToProps)(TwoLists);
 
 /***/ },
-/* 460 */
-/***/ function(module, exports, __webpack_require__) {
-
-	module.exports = { "default": __webpack_require__(461), __esModule: true };
-
-/***/ },
 /* 461 */
 /***/ function(module, exports, __webpack_require__) {
 
-	__webpack_require__(462);
-	module.exports = __webpack_require__(194).Object.keys;
+	module.exports = { "default": __webpack_require__(462), __esModule: true };
 
 /***/ },
 /* 462 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(463);
+	module.exports = __webpack_require__(194).Object.keys;
+
+/***/ },
+/* 463 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// 19.1.2.14 Object.keys(O)

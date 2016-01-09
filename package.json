@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --progress --profile --colors",
     "dev": "webpack-dev-server --progress --profile --colors --hot",
-    "http": "http-server public",
+    "http": "http-server .",
     "start": "babel-node --debug --presets es2015 -- app.js --debug",
     "test": "mocha test/*test.js"
   },
