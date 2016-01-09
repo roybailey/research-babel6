@@ -28,7 +28,8 @@ console.log(__dirname);
 
 app.configure(feathers.rest())
     .use(bodyParser.json())
-    .use(feathers.static(__dirname + '/public'))
+    .use('/public', feathers.static(__dirname + '/public'))
+    .use('/src', feathers.static(__dirname + '/src'))
     .use((req, res, next) => {
         res.header("Access-Control-Allow-Origin", "*");
         res.header("Access-Control-Allow-Headers", "X-Requested-With");
