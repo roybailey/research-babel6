@@ -120,9 +120,34 @@ if (document.querySelector("#DataFlows")) {
 if (document.querySelector("#Technologies")) {
 
     d3.json("/api/technology", (dataset)=> {
+        var rating = ['Reduce','Review','Keep','Improve','Strategic'];
         console.log(JSON.stringify(dataset));
+        var onRating = function(p1,p2) {
+            console.log("Top level Technology Rating change notification");
+            console.log(p1);
+            console.log(p2);
+            var patchData = {
+                id: p1.id,
+                category: p1.group,
+                name: p1.title,
+                strategy: rating[-1+p2]
+            };
+            console.log("PATCH: /api/technology/"+p1.id);
+            console.log("WITH : "+JSON.stringify(patchData));
+            request.patch("/api/technology/"+p1.id)
+                .send(patchData)
+                .set('Accept', 'application/json')
+                .end(function (err, res) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        console.log(res.text);
+                    }
+                });
+        };
         var props = {
-            dataset: []
+            dataset: [],
+            onRating: onRating
         };
         dataset.forEach((item=> {
             props.dataset.push({
@@ -130,7 +155,7 @@ if (document.querySelector("#Technologies")) {
                 group: item.category,
                 title: item.name,
                 status: item.strategy,
-                score: item.score
+                score: rating.indexOf(item.strategy)+1
             })
         }));
         ReactDOM.render(<StatusTable {...props}/>, document.querySelector("#Technologies"));
@@ -142,8 +167,14 @@ if (document.querySelector("#Codebase")) {
 
     d3.csv("./data/codebase.csv", (dataset)=> {
         console.log(JSON.stringify(dataset));
+        var onRating = function(p1,p2) {
+            console.log("Top level Codebase Rating change notification");
+            console.log(p1);
+            console.log(p2);
+        };
         var props = {
-            dataset: []
+            dataset: [],
+            onRating: onRating
         };
         dataset.forEach((item=> {
             props.dataset.push({
@@ -153,7 +184,7 @@ if (document.querySelector("#Codebase")) {
                 score: item.Complexity
             })
         }));
-        ReactDOM.render(<StatusTable {...props}/>, document.querySelector("#Codebase"));
+        ReactDOM.render(<StatusTable {...props} />, document.querySelector("#Codebase"));
     });
 }
 

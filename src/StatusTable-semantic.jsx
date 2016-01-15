@@ -29,7 +29,7 @@ class StatusTable extends React.Component {
             );
             tableRows.push(
                 <div className="four wide column">
-                    <Rating item={item} rating={item.score} handler={this.onRating} />
+                    <Rating item={item} rating={item.score} handler={this.props.onRating} />
                 </div>
             );
         });

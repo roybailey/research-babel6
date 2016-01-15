@@ -4569,8 +4569,9 @@
 	
 	  var hasOwn = Object.prototype.hasOwnProperty;
 	  var undefined; // More compressible than void 0.
-	  var iteratorSymbol =
-	    typeof Symbol === "function" && Symbol.iterator || "@@iterator";
+	  var $Symbol = typeof Symbol === "function" ? Symbol : {};
+	  var iteratorSymbol = $Symbol.iterator || "@@iterator";
+	  var toStringTagSymbol = $Symbol.toStringTag || "@@toStringTag";
 	
 	  var inModule = typeof module === "object";
 	  var runtime = global.regeneratorRuntime;
@@ -4640,7 +4641,7 @@
 	  var Gp = GeneratorFunctionPrototype.prototype = Generator.prototype;
 	  GeneratorFunction.prototype = Gp.constructor = GeneratorFunctionPrototype;
 	  GeneratorFunctionPrototype.constructor = GeneratorFunction;
-	  GeneratorFunction.displayName = "GeneratorFunction";
+	  GeneratorFunctionPrototype[toStringTagSymbol] = GeneratorFunction.displayName = "GeneratorFunction";
 	
 	  // Helper for defining the .next, .throw, and .return methods of the
 	  // Iterator interface in terms of a single ._invoke method.
@@ -4667,6 +4668,9 @@
 	      Object.setPrototypeOf(genFun, GeneratorFunctionPrototype);
 	    } else {
 	      genFun.__proto__ = GeneratorFunctionPrototype;
+	      if (!(toStringTagSymbol in genFun)) {
+	        genFun[toStringTagSymbol] = "GeneratorFunction";
+	      }
 	    }
 	    genFun.prototype = Object.create(Gp);
 	    return genFun;
@@ -4686,46 +4690,54 @@
 	  }
 	
 	  function AsyncIterator(generator) {
-	    // This invoke function is written in a style that assumes some
-	    // calling function (or Promise) will handle exceptions.
-	    function invoke(method, arg) {
-	      var result = generator[method](arg);
-	      var value = result.value;
-	      return value instanceof AwaitArgument
-	        ? Promise.resolve(value.arg).then(invokeNext, invokeThrow)
-	        : Promise.resolve(value).then(function(unwrapped) {
-	            // When a yielded Promise is resolved, its final value becomes
-	            // the .value of the Promise<{value,done}> result for the
-	            // current iteration. If the Promise is rejected, however, the
-	            // result for this iteration will be rejected with the same
-	            // reason. Note that rejections of yielded Promises are not
-	            // thrown back into the generator function, as is the case
-	            // when an awaited Promise is rejected. This difference in
-	            // behavior between yield and await is important, because it
-	            // allows the consumer to decide what to do with the yielded
-	            // rejection (swallow it and continue, manually .throw it back
-	            // into the generator, abandon iteration, whatever). With
-	            // await, by contrast, there is no opportunity to examine the
-	            // rejection reason outside the generator function, so the
-	            // only option is to throw it from the await expression, and
-	            // let the generator function handle the exception.
-	            result.value = unwrapped;
-	            return result;
+	    function invoke(method, arg, resolve, reject) {
+	      var record = tryCatch(generator[method], generator, arg);
+	      if (record.type === "throw") {
+	        reject(record.arg);
+	      } else {
+	        var result = record.arg;
+	        var value = result.value;
+	        if (value instanceof AwaitArgument) {
+	          return Promise.resolve(value.arg).then(function(value) {
+	            invoke("next", value, resolve, reject);
+	          }, function(err) {
+	            invoke("throw", err, resolve, reject);
 	          });
+	        }
+	
+	        return Promise.resolve(value).then(function(unwrapped) {
+	          // When a yielded Promise is resolved, its final value becomes
+	          // the .value of the Promise<{value,done}> result for the
+	          // current iteration. If the Promise is rejected, however, the
+	          // result for this iteration will be rejected with the same
+	          // reason. Note that rejections of yielded Promises are not
+	          // thrown back into the generator function, as is the case
+	          // when an awaited Promise is rejected. This difference in
+	          // behavior between yield and await is important, because it
+	          // allows the consumer to decide what to do with the yielded
+	          // rejection (swallow it and continue, manually .throw it back
+	          // into the generator, abandon iteration, whatever). With
+	          // await, by contrast, there is no opportunity to examine the
+	          // rejection reason outside the generator function, so the
+	          // only option is to throw it from the await expression, and
+	          // let the generator function handle the exception.
+	          result.value = unwrapped;
+	          resolve(result);
+	        }, reject);
+	      }
 	    }
 	
 	    if (typeof process === "object" && process.domain) {
 	      invoke = process.domain.bind(invoke);
 	    }
 	
-	    var invokeNext = invoke.bind(generator, "next");
-	    var invokeThrow = invoke.bind(generator, "throw");
-	    var invokeReturn = invoke.bind(generator, "return");
 	    var previousPromise;
 	
 	    function enqueue(method, arg) {
 	      function callInvokeWithMethodAndArg() {
-	        return invoke(method, arg);
+	        return new Promise(function(resolve, reject) {
+	          invoke(method, arg, resolve, reject);
+	        });
 	      }
 	
 	      return previousPromise =
@@ -4746,9 +4758,7 @@
 	          // Avoid propagating failures to Promises returned by later
 	          // invocations of the iterator.
 	          callInvokeWithMethodAndArg
-	        ) : new Promise(function (resolve) {
-	          resolve(callInvokeWithMethodAndArg());
-	        });
+	        ) : callInvokeWithMethodAndArg();
 	    }
 	
 	    // Define the unified helper method that is used to implement .next,
@@ -4856,13 +4866,12 @@
 	        }
 	
 	        if (method === "next") {
-	          context._sent = arg;
-	
 	          if (state === GenStateSuspendedYield) {
 	            context.sent = arg;
 	          } else {
 	            context.sent = undefined;
 	          }
+	
 	        } else if (method === "throw") {
 	          if (state === GenStateSuspendedStart) {
 	            state = GenStateCompleted;
@@ -4923,6 +4932,8 @@
 	  Gp[iteratorSymbol] = function() {
 	    return this;
 	  };
+	
+	  Gp[toStringTagSymbol] = "Generator";
 	
 	  Gp.toString = function() {
 	    return "[object Generator]";
@@ -5468,9 +5479,31 @@
 	if (document.querySelector("#Technologies")) {
 	
 	    d3.json("/api/technology", function (dataset) {
+	        var rating = ['Reduce', 'Review', 'Keep', 'Improve', 'Strategic'];
 	        console.log((0, _stringify2.default)(dataset));
+	        var onRating = function onRating(p1, p2) {
+	            console.log("Top level Technology Rating change notification");
+	            console.log(p1);
+	            console.log(p2);
+	            var patchData = {
+	                id: p1.id,
+	                category: p1.group,
+	                name: p1.title,
+	                strategy: rating[-1 + p2]
+	            };
+	            console.log("PATCH: /api/technology/" + p1.id);
+	            console.log("WITH : " + (0, _stringify2.default)(patchData));
+	            _superagent2.default.patch("/api/technology/" + p1.id).send(patchData).set('Accept', 'application/json').end(function (err, res) {
+	                if (err) {
+	                    console.log(err);
+	                } else {
+	                    console.log(res.text);
+	                }
+	            });
+	        };
 	        var props = {
-	            dataset: []
+	            dataset: [],
+	            onRating: onRating
 	        };
 	        dataset.forEach(function (item) {
 	            props.dataset.push({
@@ -5478,7 +5511,7 @@
 	                group: item.category,
 	                title: item.name,
 	                status: item.strategy,
-	                score: item.score
+	                score: rating.indexOf(item.strategy) + 1
 	            });
 	        });
 	        _reactDom2.default.render(_react2.default.createElement(_StatusTableSemantic2.default, props), document.querySelector("#Technologies"));
@@ -5489,8 +5522,14 @@
 	
 	    d3.csv("./data/codebase.csv", function (dataset) {
 	        console.log((0, _stringify2.default)(dataset));
+	        var onRating = function onRating(p1, p2) {
+	            console.log("Top level Codebase Rating change notification");
+	            console.log(p1);
+	            console.log(p2);
+	        };
 	        var props = {
-	            dataset: []
+	            dataset: [],
+	            onRating: onRating
 	        };
 	        dataset.forEach(function (item) {
 	            props.dataset.push({
@@ -5603,7 +5642,6 @@
 	});
 	
 	React.__SECRET_DOM_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactDOM;
-	React.__SECRET_DOM_SERVER_DO_NOT_USE_OR_YOU_WILL_BE_FIRED = ReactDOMServer;
 	
 	module.exports = React;
 
@@ -15857,7 +15895,6 @@
 	    multiple: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    muted: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    name: null,
-	    nonce: MUST_USE_ATTRIBUTE,
 	    noValidate: HAS_BOOLEAN_VALUE,
 	    open: HAS_BOOLEAN_VALUE,
 	    optimum: null,
@@ -15869,7 +15906,6 @@
 	    readOnly: MUST_USE_PROPERTY | HAS_BOOLEAN_VALUE,
 	    rel: null,
 	    required: HAS_BOOLEAN_VALUE,
-	    reversed: HAS_BOOLEAN_VALUE,
 	    role: MUST_USE_ATTRIBUTE,
 	    rows: MUST_USE_ATTRIBUTE | HAS_POSITIVE_NUMERIC_VALUE,
 	    rowSpan: null,
@@ -24072,7 +24108,7 @@
 	
 	'use strict';
 	
-	module.exports = '0.14.3';
+	module.exports = '0.14.2';
 
 /***/ },
 /* 341 */
@@ -31173,10 +31209,38 @@
 /* 380 */
 /***/ function(module, exports) {
 
-	var toString = {}.toString;
 	
-	module.exports = Array.isArray || function (arr) {
-	  return toString.call(arr) == '[object Array]';
+	/**
+	 * isArray
+	 */
+	
+	var isArray = Array.isArray;
+	
+	/**
+	 * toString
+	 */
+	
+	var str = Object.prototype.toString;
+	
+	/**
+	 * Whether or not the given `val`
+	 * is an array.
+	 *
+	 * example:
+	 *
+	 *        isArray([]);
+	 *        // > true
+	 *        isArray(arguments);
+	 *        // > false
+	 *        isArray('');
+	 *        // > false
+	 *
+	 * @param {mixed} val
+	 * @return {bool}
+	 */
+	
+	module.exports = isArray || function (val) {
+	  return !! val && '[object Array]' == str.call(val);
 	};
 
 
@@ -32653,12 +32717,8 @@
 	
 	// NOTE: These type checking functions intentionally don't use `instanceof`
 	// because it is fragile and can be easily faked with `Object.create()`.
-	
-	function isArray(arg) {
-	  if (Array.isArray) {
-	    return Array.isArray(arg);
-	  }
-	  return objectToString(arg) === '[object Array]';
+	function isArray(ar) {
+	  return Array.isArray(ar);
 	}
 	exports.isArray = isArray;
 	
@@ -32698,7 +32758,7 @@
 	exports.isUndefined = isUndefined;
 	
 	function isRegExp(re) {
-	  return objectToString(re) === '[object RegExp]';
+	  return isObject(re) && objectToString(re) === '[object RegExp]';
 	}
 	exports.isRegExp = isRegExp;
 	
@@ -32708,12 +32768,13 @@
 	exports.isObject = isObject;
 	
 	function isDate(d) {
-	  return objectToString(d) === '[object Date]';
+	  return isObject(d) && objectToString(d) === '[object Date]';
 	}
 	exports.isDate = isDate;
 	
 	function isError(e) {
-	  return (objectToString(e) === '[object Error]' || e instanceof Error);
+	  return isObject(e) &&
+	      (objectToString(e) === '[object Error]' || e instanceof Error);
 	}
 	exports.isError = isError;
 	
@@ -32732,12 +32793,14 @@
 	}
 	exports.isPrimitive = isPrimitive;
 	
-	exports.isBuffer = Buffer.isBuffer;
+	function isBuffer(arg) {
+	  return Buffer.isBuffer(arg);
+	}
+	exports.isBuffer = isBuffer;
 	
 	function objectToString(o) {
 	  return Object.prototype.toString.call(o);
 	}
-	
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(377).Buffer))
 
 /***/ },
@@ -44748,7 +44811,7 @@
 	                tableRows.push(_react2.default.createElement(
 	                    'div',
 	                    { className: 'four wide column' },
-	                    _react2.default.createElement(_RatingSemantic2.default, { item: item, rating: item.score, handler: _this2.onRating })
+	                    _react2.default.createElement(_RatingSemantic2.default, { item: item, rating: item.score, handler: _this2.props.onRating })
 	                ));
 	            });
 	            console.log(tableRows);
