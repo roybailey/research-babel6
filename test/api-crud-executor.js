@@ -8,11 +8,11 @@ module.exports = function (spec) {
 
     var request = supertest(spec.baseurl);
 
-    logRequest = function (req, data) {
+    var logRequest = function (req, data) {
         console.log("> " + req + " > " + JSON.stringify(data));
         return req;
     };
-    logResponse = function (err, res) {
+    var logResponse = function (err, res) {
         if (err) {
             console.log("< " + err);
         } else {
@@ -21,7 +21,7 @@ module.exports = function (spec) {
         }
         return err;
     };
-    assertSchema = function (typeMatch, record) {
+    var assertSchema = function (typeMatch, record) {
         // validate the response data types...
         for (var property in typeMatch) {
             if (typeMatch.hasOwnProperty(property)) {
