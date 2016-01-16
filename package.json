@@ -8,8 +8,9 @@
     "dev": "webpack-dev-server --progress --profile --colors --hot",
     "http": "http-server .",
     "start": "babel-node --debug --presets es2015 -- app.js --debug",
-    "test": "mocha test/*test.js --compilers js:babel-core/register",
-    "test-es6": "mocha test/*es6-test.js --compilers js:babel-core/register"
+    "test": "mocha test/**/*-test.js --compilers js:babel-core/register",
+    "test-api": "mocha test/api/*-test.js --compilers js:babel-core/register",
+    "test-action": "mocha test/action/*-test.js --compilers js:babel-core/register"
   },
   "repository": {
     "type": "git",
