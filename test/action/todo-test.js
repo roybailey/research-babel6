@@ -2,20 +2,20 @@ import { expect } from 'chai';
 import deepFreeze from 'deep-freeze';
 
 const todos = (state = [], action = undefined) => {
-switch(action.type){
-    case 'ADD_TODO':
-        return [
-            ...state,
-            {
-                id: action.id,
-                text: action.text,
-                completed: false
-            }
-        ];
-        break;
-    default:
-        return state;
-}
+    switch (action.type) {
+        case 'ADD_TODO':
+            return [
+                ...state,
+                {
+                    id: action.id,
+                    text: action.text,
+                    completed: false
+                }
+            ];
+            break;
+        default:
+            return state;
+    }
 };
 
 const testAddTodo = () => {
